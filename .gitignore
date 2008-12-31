@@ -1,0 +1,10 @@
+*.pyc
+*.swp
+*.swo
+*.bak
+*.gladep
+*.vim
+*.egg-info
+dist
+MANIFEST
+build
