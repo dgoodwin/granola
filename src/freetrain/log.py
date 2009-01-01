@@ -15,8 +15,6 @@
 
 """ Utility functions related to logging. """
 
-__revision__ = "$Revision$"
-
 import logging.config
 
 from os.path import expanduser, exists, abspath
