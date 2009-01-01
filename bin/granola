@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 #   Granola - GPS Enabled Open Source Workout/Adventure Log
 #
 #   Copyright (C) 2008 Devan Goodwin <dgoodwin@dangerouslyinc.com>
@@ -28,13 +27,11 @@ setup_logging(log_conf_locations)
 from logging import getLogger
 log = getLogger("granola")
 
+from granola.model import initialize_db
+
 import commands
 import os
 import os.path
-
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, \
-        String, ForeignKey
-from sqlalchemy.orm import mapper, relation
 
 VERSION = "0.1"
 DATA_DIR = os.path.expanduser("~/.granola")
@@ -50,45 +47,18 @@ def is_first_run():
         return True
     return False
 
-class Sport(object):
-    pass
-
-class Activity(object):
-    pass
-
-class Lap(object):
-    pass
-
 def initialize_granola():
     """
     Create the data directory, database, config files, and anything else
     required on the first run of the software.
     """
-    log.info("Creating %s" % DATA_DIR)
+    log.info("Creating %s." % DATA_DIR)
     try:
         os.mkdir(DATA_DIR)
     except OSError:
         pass
 
-    log.info("Creating and populating granola database")
-    db_str = "sqlite:///%s" % SQLITE_DB
-    db = create_engine(db_str, echo=True)
-    metadata = MetaData(db)
-    sport_table = Table('sport', metadata,
-            Column('id', Integer, primary_key=True),
-            Column('name', String(40)),
-    )
-
-    activity_table = Table('activity', metadata,
-            Column('id', Integer, primary_key=True),
-            Column('date_id', String(30)), # may not be needed
-            Column('sport_id', Integer, ForeignKey('sport.id')),
-    )
-    mapper(Activity, activity_table, properties={
-        'sport': relation(Sport)})
-    mapper(Sport, sport_table)
-
-    metadata.create_all()
+    initialize_db(SQLITE_DB)
 
 if __name__ == "__main__":
     log.info("Starting granola %s." % VERSION)
@@ -96,6 +66,3 @@ if __name__ == "__main__":
     if is_first_run():
         initialize_granola()
 
-    #users = Table('users', metadata, autoload=True)
-    #emails = Table('emails', metadata, autoload=True)
-    #session = create_session()
