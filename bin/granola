@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+
+#   Granola - GPS Enabled Open Source Workout/Adventure Log
+#
+#   Copyright (C) 2008 Devan Goodwin <dgoodwin@dangerouslyinc.com>
+#
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+#   02110-1301  USA
+
+
+# Configure logging: (needs to be done before importing our modules)
+from granola.log import setup_logging
+log_conf_locations = ["~/.granola/logging.conf", "./logging.conf"]
+setup_logging(log_conf_locations)
+from logging import getLogger
+log = getLogger("granola")
+
+import commands
+import os
+import os.path
+
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, \
+        String
+
+VERSION = "0.1"
+DATA_DIR = os.path.expanduser("~/.granola")
+SQLITE_DB = "%s/granola.db" % DATA_DIR
+
+def is_first_run():
+    """ 
+    Return True if this is the first time the user has run this program. 
+    """
+    if (not os.path.exists(DATA_DIR)):
+        return True
+    if (not os.path.exists(SQLITE_DB)):
+        return True
+    return False
+
+def initialize_granola():
+    """
+    Create the data directory, database, config files, and anything else
+    required on the first run of the software.
+    """
+    log.info("Creating %s" % DATA_DIR)
+    try:
+        os.mkdir(DATA_DIR)
+    except OSError:
+        pass
+
+    log.info("Creating and populating granola database")
+    cmd = 'sqlite3 -line %s "select * from nosuchtable;"' % \
+            SQLITE_DB
+    commands.getoutput(cmd)
+    db_str = "sqlite:///%s" % SQLITE_DB
+    print db_str
+    db = create_engine(db_str, echo=True)
+    metadata = MetaData(db)
+    sport = Table('sport', metadata,
+        Column('id', Integer, primary_key=True),
+        Column('name', String(40)),
+    )
+    metadata.create_all()
+
+if __name__ == "__main__":
+    log.info("Starting granola %s." % VERSION)
+
+    if is_first_run():
+        initialize_granola()
+
+    #users = Table('users', metadata, autoload=True)
+    #emails = Table('emails', metadata, autoload=True)
+    #session = create_session()
