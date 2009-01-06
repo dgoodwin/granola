@@ -39,20 +39,6 @@ class Sport(Base):
 
 
 
-class Activity(Base):
-    __tablename__ = "activity"
-
-    id = Column(Integer, primary_key=True)
-    date_id = Column(String(30)) # may not be needed
-    sport_id = Column(Integer, ForeignKey('sport.id'))
-    sport = relation(Sport)
-
-    def __init__(self, date_id=None, sport_id=None):
-        self.date_id = date_id
-        self.sport_id = sport_id
-
-
-
 class Lap(Base):
     __tablename__ = "lap"
 
@@ -62,8 +48,25 @@ class Lap(Base):
     distance = Column(Numeric(20, 6)) # meters
     speed_max = Column(Numeric(9, 6)) # meters per second
     calories = Column(Integer)
-    heart_rate_max = Column(Integer)
-    heart_rate_avg = Column(Integer)
+    heart_rate_max = Column(Integer) # beats per minute
+    heart_rate_avg = Column(Integer) # beats per minute
+
+    activity_id = Column(Integer, ForeignKey('activity.id'))
+
+
+
+class Activity(Base):
+    __tablename__ = "activity"
+
+    id = Column(Integer, primary_key=True)
+    date_id = Column(String(30)) # may not be needed
+    sport_id = Column(Integer, ForeignKey('sport.id'))
+    sport = relation(Sport)
+    laps = relation(Lap)
+
+    def __init__(self, date_id=None, sport_id=None):
+        self.date_id = date_id
+        self.sport_id = sport_id
 
 
 
