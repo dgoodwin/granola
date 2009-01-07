@@ -28,6 +28,7 @@ from logging import getLogger
 log = getLogger("granola")
 
 from granola.model import initialize_db
+from granola.importer import GarminTcxImporter
 
 import commands
 import os
@@ -66,3 +67,5 @@ if __name__ == "__main__":
     if is_first_run():
         initialize_granola()
 
+    importer = GarminTcxImporter()
+    importer.scan_dir(os.path.expanduser("~/exports"))
