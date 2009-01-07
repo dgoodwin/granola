@@ -22,7 +22,7 @@ from logging import getLogger
 log = getLogger("granola.model")
 
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, \
-        String, ForeignKey, Numeric
+        String, ForeignKey, Numeric, DateTime
 from sqlalchemy.orm import mapper, relation
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -39,6 +39,20 @@ class Sport(Base):
 
 
 
+class TrackPoint(Base):
+    __tablename__ = "trackpoint"
+
+    id = Column(Integer, primary_key=True)
+    lap_id = Column(Integer, ForeignKey('lap.id'))
+    time = Column(DateTime(timezone=True))
+    latitude = Column(Numeric(9, 6))
+    longitude = Column(Numeric(9, 6))
+    altitude = Column(Numeric(12, 6))
+    distance = Column(Numeric(12, 6))
+    heart_rate = Column(Integer)
+
+
+
 class Lap(Base):
     __tablename__ = "lap"
 
@@ -52,6 +66,7 @@ class Lap(Base):
     heart_rate_avg = Column(Integer) # beats per minute
 
     activity_id = Column(Integer, ForeignKey('activity.id'))
+    trackpoints = relation(TrackPoint)
 
 
 
