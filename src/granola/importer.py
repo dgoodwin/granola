@@ -1,6 +1,6 @@
 #   Granola - GPS Enabled Open Source Workout/Adventure Log
 #
-#   Copyright (C) 2008 Devan Goodwin <dgoodwin@dangerouslyinc.com>
+#   Copyright (C) 2009 Devan Goodwin <dgoodwin@dangerouslyinc.com>
 #
 #
 #   This program is free software; you can redistribute it and/or modify
