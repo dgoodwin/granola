@@ -1,0 +1,1 @@
+- Add a schema version somewhere in the database. (for upgrades)
