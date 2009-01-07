@@ -22,12 +22,19 @@ from logging import getLogger
 log = getLogger("granola.import")
 
 import os
+from xml.etree.ElementTree import ElementTree
 
 class Importer(object):
     """ Parent Importer class. """
 
     def scan_dir(self, directory):
         """ Scan a directory for new data files to import. """
+        pass
+
+    def import_file(self, filename):
+        """ 
+        Import the data in the given file. (if we haven't done so before). 
+        """
         pass
 
 
@@ -50,8 +57,17 @@ class GarminTcxImporter(Importer):
                     self.import_file(os.path.join(root, file))
 
     def import_file(self, filename):
-        """ Import the data in the given file if necessary. """
+        """ 
+        Import the data in the given file. (if we haven't done so before). 
+        """
         if not os.path.exists(filename):
             raise Exception("No such file: %s" % filename)
         log.info("Importing: %s" % filename)
+
         # TODO: Check that we haven't already imported this file.
+
+        tree = ElementTree()
+        tree.parse(filename)
+        root = tree.getroot()
+        print root.getchildren()
+
