@@ -21,13 +21,31 @@
 from logging import getLogger
 log = getLogger("granola.model")
 
+from granola.const import DATA_DIR
+
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, \
         String, ForeignKey, Numeric, DateTime
 from sqlalchemy.orm import mapper, relation, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
+SQLITE_DB = "%s/granola.db" % DATA_DIR
+
+def connect_to_db():
+    """
+    Open a connection to our database.
+
+    Should be called only once when this module is first imported.
+    """
+    db_str = "sqlite:///%s" % SQLITE_DB
+    log.debug("Connecting to database: %s" % db_str)
+    db = create_engine(db_str, echo=True)
+    return db
+
 Base = declarative_base()
-Session = sessionmaker() # Create a session class
+Session = sessionmaker() 
+# Open a globally accessible connection to the database:
+DB = connect_to_db()
+Session.configure(bind=DB)
 
 class Sport(Base):
     __tablename__ = "sport"
@@ -86,19 +104,18 @@ class Activity(Base):
 
 
 
-def initialize_db(sqlite_db):
+def initialize_db():
     """
     Open the database, presumably for the first time, and populate the schema. 
+
+    Returns the database engine.
     """
     log.info("Creating the granola database.")
-    db_str = "sqlite:///%s" % sqlite_db
-    db = create_engine(db_str, echo=True)
 
     metadata = Base.metadata
-    metadata.bind = db
+    metadata.bind = DB
     metadata.create_all()
 
-    Session.configure(bind=db)
     session = Session()
 
     # Populate the schema:

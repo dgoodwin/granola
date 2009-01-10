@@ -24,6 +24,8 @@ log = getLogger("granola.import")
 import os
 from xml.etree.ElementTree import ElementTree
 
+from granola.model import Session
+
 class Importer(object):
     """ Parent Importer class. """
 
@@ -69,5 +71,7 @@ class GarminTcxImporter(Importer):
         tree = ElementTree()
         tree.parse(filename)
         root = tree.getroot()
-        print root.getchildren()
+        for child in root.getchildren():
+            if child.tag.endswith("Activities"):
+                print("Found activities!")
 
