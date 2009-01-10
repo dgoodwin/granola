@@ -23,10 +23,11 @@ log = getLogger("granola.model")
 
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, \
         String, ForeignKey, Numeric, DateTime
-from sqlalchemy.orm import mapper, relation
+from sqlalchemy.orm import mapper, relation, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+Session = sessionmaker() # Create a session class
 
 class Sport(Base):
     __tablename__ = "sport"
@@ -96,4 +97,15 @@ def initialize_db(sqlite_db):
     metadata = Base.metadata
     metadata.bind = db
     metadata.create_all()
+
+    Session.configure(bind=db)
+    session = Session()
+
+    # Populate the schema:
+    session.add_all([
+        Sport("Running"),
+        Sport("Cycling"),
+        Sport("Hiking"),
+    ])
+    session.commit()
 
