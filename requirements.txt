@@ -1,0 +1,8 @@
+RPMs required in Fedora:
+
+python-sqlite2
+sqlite
+python-sqlalchemy
+pyton-dateutil
+garmin-sync (kinda)
+
