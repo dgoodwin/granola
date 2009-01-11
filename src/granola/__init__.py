@@ -26,11 +26,8 @@ import os
 import os.path
 
 from granola.log import log
+from granola.const import DATA_DIR, SQLITE_DB
 from granola.model import initialize_db
-
-
-DATA_DIR = os.path.expanduser("~/.granola")
-SQLITE_DB = "%s/granola.db" % DATA_DIR
 
 
 def is_first_run():
@@ -56,4 +53,3 @@ def initialize_granola():
         pass
 
     initialize_db()
-

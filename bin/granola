@@ -30,23 +30,26 @@ from granola.model import initialize_db, SQLITE_DB
 from granola.importer import GarminTcxImporter
 from granola.const import VERSION, DATA_DIR
 
+
 __version__ = "0.1"
+
 
 def main():
     """ Main entry point. """
     log.info("Starting granola %s." % __version__)
- 
+
     if is_first_run():
         initialize_granola()
 
     importer = GarminTcxImporter()
-    importer.scan_dir(os.path.expanduser("~/exports"))
+    export_path = os.path.expanduser(os.path.join("~", "exports"))
+    # FIXME: Should this really run in and outside the try/except?
+    importer.scan_dir(export_path)
     try:
-        importer.scan_dir(os.path.expanduser("~/exports"))
+        importer.scan_dir(export_path)
     except Exception, ex:
         print ex
 
 
 if __name__ == "__main__":
     main()
-

@@ -21,8 +21,9 @@
 """ Utility functions related to logging. """
 
 import logging.config
+import os.path
 
-from os.path import expanduser, exists, abspath
+from granola.const import LOG_CONF_LOCATIONS
 
 
 def setup_logging(conf_file_locations):
@@ -32,19 +33,19 @@ def setup_logging(conf_file_locations):
     """
     actual_log_conf_location = None
     for location in conf_file_locations:
-        if exists(expanduser(location)):
+        if os.path.exists(os.path.expanduser(location)):
             actual_log_conf_location = location
             break
 
     if actual_log_conf_location != None:
-        logging.config.fileConfig(expanduser(actual_log_conf_location))
+        logging.config.fileConfig(os.path.expanduser(actual_log_conf_location))
     else:
         print("Unable to locate logging configuration in the " + \
             "following locations:")
         for location in conf_file_locations:
-            print("   " + abspath(expanduser(location)))
+            print("   " + os.path.abspath(os.path.expanduser(location)))
 
-log_conf_locations = ["~/.granola/logging.conf", "./logging.conf"]
-setup_logging(log_conf_locations)
+
+setup_logging(LOG_CONF_LOCATIONS)
 
 log = logging.getLogger("granola")

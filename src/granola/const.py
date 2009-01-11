@@ -18,9 +18,17 @@
 #   along with this program; if not, write to the Free Software
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
+"""
+All constants.
+"""
 
-import os
+import os.path
+
 
 VERSION = "0.1"
-DATA_DIR = os.path.expanduser("~/.granola")
-
+DATA_DIR = os.path.expanduser(os.path.join("~", ".granola"))
+SQLITE_DB = os.path.join(DATA_DIR, "granola.db")
+LOG_CONF_LOCATIONS = [
+    os.path.join("~", ".granola", "logging.conf"),
+    os.path.join(".", "conf", "logging.conf"),
+]
