@@ -25,6 +25,10 @@ from xml.etree.ElementTree import ElementTree
 from granola.model import *
 from granola.log import log
 
+def debug_activity(activity):
+    """ Log debug info on this activity. """
+    log.debug("Activity: %s" % activity.start_time)
+
 class Importer(object):
     """ Parent Importer class. """
 
@@ -96,6 +100,8 @@ class GarminTcxImporter(Importer):
         start_time_elem = activity_elem.find(self._get_tag("Id"))
         start_time = dateutil.parser.parse(start_time_elem.text)
         activity = Activity(start_time=start_time, sport=sport)
+
+        debug_activity(activity)
         session.add(activity)
 
     def _get_activity_sport(self, session, activity):
