@@ -1,1 +1,3 @@
+- Add setup.py.
+- Package in RPM.
 - Add a schema version somewhere in the database. (for upgrades)
