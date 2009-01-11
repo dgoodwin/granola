@@ -21,7 +21,7 @@
 import os
 from xml.etree.ElementTree import ElementTree
 
-from granola.model import Session
+from granola.model import *
 from granola.log import log
 
 class Importer(object):
@@ -45,6 +45,8 @@ class GarminTcxImporter(Importer):
     
     See: http://developer.garmin.com/schemas/tcx/v2/
     """
+    # TODO: There must be a way to get this off the ElementTree object:
+    xmlns = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
 
     def scan_dir(self, directory):
         """ Scan a directory for new data files to import. """
@@ -65,11 +67,36 @@ class GarminTcxImporter(Importer):
         log.info("Importing: %s" % filename)
 
         # TODO: Check that we haven't already imported this file.
+        session = Session()
 
         tree = ElementTree()
         tree.parse(filename)
         root = tree.getroot()
-        for child in root.getchildren():
-            if child.tag.endswith("Activities"):
-                print("Found activities!")
+        activities = root.find(self._get_tag("Activities"))
+        if activities is None: 
+            raise Exception("Unable to parse %s: No activities found." %
+                    filename)
+        for activity_elem in activities.findall(self._get_tag("Activity")):
+            self._parse_activity(session, activity_elem)
+
+    def _parse_activity(self, session, activity):
+        """ Parse an XML activity element. """
+        sport = self._get_activity_sport(session, activity)
+
+    def _get_activity_sport(self, session, activity):
+        """
+        Lookup a Sport object for this activity.
+        """
+        xml_sport = activity.attrib['Sport']
+        log.debug("Activity sport: %s" % xml_sport)
+        sport = session.query(Sport).filter(Sport.name.like(xml_sport))
+        log.debug("Sport: %s" % sport)
+
+
+    def _get_tag(self, tag):
+        """
+        Returns the tag name prefixed with the XML namespace.
+        i.e. {XMLNS}Tag
+        """
+        return "{%s}%s" % (self.xmlns, tag)
 
