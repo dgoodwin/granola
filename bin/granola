@@ -19,50 +19,34 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-
-# Configure logging: (needs to be done before importing our modules)
-from granola.log import setup_logging
-log_conf_locations = ["~/.granola/logging.conf", "./logging.conf"]
-setup_logging(log_conf_locations)
-from logging import getLogger
-log = getLogger("granola")
-
-from granola.model import initialize_db, SQLITE_DB
-from granola.importer import GarminTcxImporter
-from granola.const import VERSION, DATA_DIR
-
+import logging
 import commands
 import os
 import os.path
 
-def is_first_run():
-    """ 
-    Return True if this is the first time the user has run this program. 
-    """
-    if (not os.path.exists(DATA_DIR)):
-        return True
-    if (not os.path.exists(SQLITE_DB)):
-        return True
-    return False
+from granola import is_first_run, initialize_granola
+from granola.log import log
+from granola.model import initialize_db, SQLITE_DB
+from granola.importer import GarminTcxImporter
+from granola.const import VERSION, DATA_DIR
 
-def initialize_granola():
-    """
-    Create the data directory, database, config files, and anything else
-    required on the first run of the software.
-    """
-    log.info("Creating %s." % DATA_DIR)
-    try:
-        os.mkdir(DATA_DIR)
-    except OSError:
-        pass
+__version__ = "0.1"
 
-    initialize_db()
-
-if __name__ == "__main__":
-    log.info("Starting granola %s." % VERSION)
-
+def main():
+    """ Main entry point. """
+    log.info("Starting granola %s." % __version__)
+ 
     if is_first_run():
         initialize_granola()
 
     importer = GarminTcxImporter()
     importer.scan_dir(os.path.expanduser("~/exports"))
+    try:
+        importer.scan_dir(os.path.expanduser("~/exports"))
+    except Exception, ex:
+        print ex
+
+
+if __name__ == "__main__":
+    main()
+

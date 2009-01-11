@@ -18,9 +18,7 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-from logging import getLogger
-log = getLogger("granola.model")
-
+from granola.log import log
 from granola.const import DATA_DIR
 
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, \
@@ -48,6 +46,7 @@ DB = connect_to_db()
 Session.configure(bind=DB)
 
 class Sport(Base):
+
     __tablename__ = "sport"
     
     id = Column(Integer, primary_key=True)
@@ -59,6 +58,7 @@ class Sport(Base):
 
 
 class TrackPoint(Base):
+
     __tablename__ = "trackpoint"
 
     id = Column(Integer, primary_key=True)
@@ -73,6 +73,7 @@ class TrackPoint(Base):
 
 
 class Lap(Base):
+
     __tablename__ = "lap"
 
     id = Column(Integer, primary_key=True)
@@ -90,6 +91,7 @@ class Lap(Base):
 
 
 class Activity(Base):
+
     __tablename__ = "activity"
 
     id = Column(Integer, primary_key=True)

@@ -44,3 +44,7 @@ def setup_logging(conf_file_locations):
         for location in conf_file_locations:
             print("   " + abspath(expanduser(location)))
 
+log_conf_locations = ["~/.granola/logging.conf", "./logging.conf"]
+setup_logging(log_conf_locations)
+
+log = logging.getLogger("granola")

@@ -18,13 +18,11 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
-from logging import getLogger
-log = getLogger("granola.import")
-
 import os
 from xml.etree.ElementTree import ElementTree
 
 from granola.model import Session
+from granola.log import log
 
 class Importer(object):
     """ Parent Importer class. """
