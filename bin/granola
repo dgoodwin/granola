@@ -43,8 +43,6 @@ def main():
 
     importer = GarminTcxImporter()
     export_path = os.path.expanduser(os.path.join("~", "exports"))
-    # FIXME: Should this really run in and outside the try/except?
-    importer.scan_dir(export_path)
     try:
         importer.scan_dir(export_path)
     except Exception, ex:

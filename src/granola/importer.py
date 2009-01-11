@@ -19,6 +19,7 @@
 #   02110-1301  USA
 
 import os
+import dateutil.parser
 from xml.etree.ElementTree import ElementTree
 
 from granola.model import *
@@ -33,7 +34,7 @@ class Importer(object):
 
     def import_file(self, filename):
         """ 
-        Import the data in the given file. (if we haven't done so before). 
+        Import the data in the given file. 
         """
         pass
 
@@ -53,45 +54,59 @@ class GarminTcxImporter(Importer):
         if not os.path.exists(directory):
             raise Exception("No such directory: %s" % directory)
         log.debug("Scanning %s for new data." % directory) 
+
+        session = Session()
+
         for root, dirs, files in os.walk(directory):
             for file in files:
                 if file.endswith(".tcx"):
-                    self.import_file(os.path.join(root, file))
+                    # TODO: Check if we've imported this file before. Assume
+                    # if an activity exists with a start time equal to the 
+                    # file name, that way we dont waste time parsing
+                    # the XML.
+                    try:
+                        self.import_file(session, os.path.join(root, file))
+                        session.commit()
+                    except Exception, ex:
+                        log.error("Error importing: %s" % file)
+                        log.error(ex)
+                        session.rollback()
 
-    def import_file(self, filename):
+    def import_file(self, session, filename):
         """ 
-        Import the data in the given file. (if we haven't done so before). 
+        Import the data in the given file. 
         """
         if not os.path.exists(filename):
             raise Exception("No such file: %s" % filename)
         log.info("Importing: %s" % filename)
 
-        # TODO: Check that we haven't already imported this file.
-        session = Session()
-
         tree = ElementTree()
         tree.parse(filename)
         root = tree.getroot()
-        activities = root.find(self._get_tag("Activities"))
-        if activities is None: 
+        activities_elem = root.find(self._get_tag("Activities"))
+        if activities_elem is None: 
             raise Exception("Unable to parse %s: No activities found." %
                     filename)
-        for activity_elem in activities.findall(self._get_tag("Activity")):
+        for activity_elem in activities_elem.findall(self._get_tag("Activity")):
             self._parse_activity(session, activity_elem)
 
-    def _parse_activity(self, session, activity):
+    def _parse_activity(self, session, activity_elem):
         """ Parse an XML activity element. """
-        sport = self._get_activity_sport(session, activity)
+        sport = self._get_activity_sport(session, activity_elem)
+        start_time_elem = activity_elem.find(self._get_tag("Id"))
+        start_time = dateutil.parser.parse(start_time_elem.text)
+        activity = Activity(start_time=start_time, sport=sport)
+        session.add(activity)
 
     def _get_activity_sport(self, session, activity):
         """
         Lookup a Sport object for this activity.
         """
         xml_sport = activity.attrib['Sport']
-        log.debug("Activity sport: %s" % xml_sport)
-        sport = session.query(Sport).filter(Sport.name.like(xml_sport))
-        log.debug("Sport: %s" % sport)
-
+        q = session.query(Sport).filter(Sport.name.like(xml_sport))
+        # Will error out if no sport is found:
+        sport = q.one()
+        return sport
 
     def _get_tag(self, tag):
         """

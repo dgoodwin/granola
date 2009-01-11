@@ -36,7 +36,10 @@ def connect_to_db():
     """
     db_str = "sqlite:///%s" % SQLITE_DB
     log.debug("Connecting to database: %s" % db_str)
-    db = create_engine(db_str, echo=True)
+
+    # Set echo True to see lots of sqlalchemy output:
+    db = create_engine(db_str, echo=False)
+
     return db
 
 Base = declarative_base()
@@ -54,6 +57,9 @@ class Sport(Base):
 
     def __init__(self, name=None):
         self.name = name
+
+    def __repr__(self):
+        return self.name
 
 
 
@@ -78,6 +84,7 @@ class Lap(Base):
 
     id = Column(Integer, primary_key=True)
     activity_id = Column(Integer, ForeignKey('activity.id'))
+    start_time = Column(DateTime(timezone=True))
     duration = Column(Numeric(14, 6)) # seconds
     distance = Column(Numeric(20, 6)) # meters
     speed_max = Column(Numeric(9, 6)) # meters per second
@@ -95,16 +102,20 @@ class Activity(Base):
     __tablename__ = "activity"
 
     id = Column(Integer, primary_key=True)
-    date_id = Column(String(30)) # may not be needed
-    sport_id = Column(Integer, ForeignKey('sport.id'))
+    # Might want to drop this and just use the start time of the first lap:
+    start_time = Column(DateTime(timezone=True), nullable=False, unique=True)
+    sport_id = Column(Integer, ForeignKey('sport.id'), nullable=False)
+
     sport = relation(Sport)
     laps = relation(Lap)
 
-    def __init__(self, date_id=None, sport_id=None):
-        self.date_id = date_id
-        self.sport_id = sport_id
+    def __init__(self, start_time=None, sport=None):
+        self.start_time = start_time
+        self.sport = sport
 
 
+
+# TODO: Add settings table, store the schema version in it.
 
 def initialize_db():
     """
@@ -123,8 +134,9 @@ def initialize_db():
     # Populate the schema:
     session.add_all([
         Sport("Running"),
-        Sport("Cycling"),
+        Sport("Biking"),
         Sport("Hiking"),
+        Sport("Other"),
     ])
     session.commit()
 
