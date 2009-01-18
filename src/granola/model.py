@@ -92,8 +92,18 @@ class Lap(Base):
     heart_rate_max = Column(Integer) # beats per minute
     heart_rate_avg = Column(Integer) # beats per minute
 
-    activity_id = Column(Integer, ForeignKey('activity.id'))
     trackpoints = relation(TrackPoint)
+
+    def __init__(self, start_time=None, duration=None, distance=None,
+            speed_max=None, calories=None, heart_rate_max=None, 
+            heart_rate_avg=None):
+        self.start_time = start_time
+        self.duration = duration
+        self.distance = distance
+        self.speed_max = speed_max
+        self.calories = calories
+        self.heart_rate_max = heart_rate_max
+        self.heart_rate_avg = heart_rate_avg
 
 
 

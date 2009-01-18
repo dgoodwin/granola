@@ -43,10 +43,10 @@ def main():
 
     importer = GarminTcxImporter()
     export_path = os.path.expanduser(os.path.join("~", "exports"))
-    try:
-        importer.scan_dir(export_path)
-    except Exception, ex:
-        print ex
+    #try:
+    importer.scan_dir(export_path)
+    #except Exception, ex:
+    #    print ex
 
 
 if __name__ == "__main__":
