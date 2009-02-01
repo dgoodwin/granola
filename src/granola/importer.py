@@ -75,10 +75,6 @@ class GarminTcxImporter(Importer):
         for root, dirs, files in os.walk(directory):
             for file in files:
                 if file.endswith(".tcx"):
-                    # TODO: Check if we've imported this file before. Assume
-                    # if an activity exists with a start time equal to the 
-                    # file name, that way we dont waste time parsing
-                    # the XML.
 #                    try:
                         self.import_file(session, os.path.join(root, file))
                         session.commit()
@@ -93,6 +89,17 @@ class GarminTcxImporter(Importer):
         """
         if not os.path.exists(filename):
             raise Exception("No such file: %s" % filename)
+
+        # Check if we've imported this file before. Assume
+        # if an activity exists with a start time equal to the 
+        # file name, that way we dont waste time parsing
+        # the XML.
+        start_time = dateutil.parser.parse(os.path.basename(filename)[0:-4])
+        if session.query(Activity).filter(Activity.start_time == 
+                start_time).first():
+            log.info("Skipping: %s" % start_time)
+            return
+
         log.info("Importing: %s" % filename)
 
         tree = ElementTree()
@@ -114,12 +121,6 @@ class GarminTcxImporter(Importer):
         # guaranteed in the XML definition:
         start_time_elem = activity_elem.find(self._get_tag("Id"))
         start_time = dateutil.parser.parse(start_time_elem.text)
-
-        # Check if the start_time already exists, skip this activity if so:
-        if session.query(Activity).filter(Activity.start_time == 
-                start_time).first():
-            log.info("  Skipping activity: %s" % start_time)
-            return
 
         activity = Activity(start_time=start_time, sport=sport)
         lap_elements = activity_elem.findall(self._get_tag("Lap"))
