@@ -29,6 +29,7 @@ from granola.log import log
 from granola.model import initialize_db, SQLITE_DB
 from granola.importer import GarminTcxImporter
 from granola.const import VERSION, DATA_DIR
+from granola.ui import GranolaMainWindow
 
 
 __version__ = "0.1"
@@ -43,10 +44,14 @@ def main():
 
     importer = GarminTcxImporter()
     export_path = os.path.expanduser(os.path.join("~", "exports"))
+    # TODO: Import on demand or automatically?
     #try:
     importer.scan_dir(export_path)
     #except Exception, ex:
     #    print ex
+    ui = GranolaMainWindow()
+    ui.main()
+
 
 
 if __name__ == "__main__":
