@@ -115,12 +115,17 @@ class GarminTcxImporter(Importer):
         start_time_elem = activity_elem.find(self._get_tag("Id"))
         start_time = dateutil.parser.parse(start_time_elem.text)
 
+        # Check if the start_time already exists, skip this activity if so:
+        if session.query(Activity).filter(Activity.start_time == 
+                start_time).first():
+            log.info("  Skipping activity: %s" % start_time)
+            return
+
         activity = Activity(start_time=start_time, sport=sport)
         lap_elements = activity_elem.findall(self._get_tag("Lap"))
         for lap_elem in lap_elements:
             new_lap = self._parse_lap(lap_elem)
             activity.laps.append(new_lap)
-
 
         debug_activity(activity)
         session.add(activity)
