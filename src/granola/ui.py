@@ -24,6 +24,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gtk.glade
+import gobject
 import os
 import sys
 
@@ -56,8 +57,23 @@ class GranolaMainWindow:
         glade_file = 'granola/glade/mainwindow.glade'
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         main_window = self.glade_xml.get_widget('main_window')
+
+        self._populate_trees()
+
         main_window.show_all()
 
     def main(self):
         """ Launch the GTK main loop. """
         gtk.main()
+
+    def _populate_trees(self):
+        self._populate_running_tab_trees()
+
+    def _populate_running_tab_trees(self):
+        """ Populate lists on the running tab. """
+        runs_list_store = gtk.ListStore(
+                gobject.TYPE_STRING, 
+                gobject.TYPE_FLOAT
+        )
+        runs_list_store.append(["2009-02-08 12:50pm", 4.67])
+
