@@ -71,9 +71,37 @@ class GranolaMainWindow:
 
     def _populate_running_tab_trees(self):
         """ Populate lists on the running tab. """
-        runs_list_store = gtk.ListStore(
-                gobject.TYPE_STRING, 
-                gobject.TYPE_FLOAT
+
+        runs_liststore = gtk.ListStore(
+                str, 
+                float 
         )
-        runs_list_store.append(["2009-02-08 12:50pm", 4.67])
+        runs_liststore.append(["2009-02-08 12:50pm", 4.67])
+        runs_liststore.append(["2009-02-09 2:50pm", 4.97])
+
+        runs_treeview = self.glade_xml.get_widget("runs_treeview")
+        print "Found treeview:"
+        print runs_treeview
+        runs_treeview.set_model(runs_liststore)
+
+        # Create columns:
+        date_column = gtk.TreeViewColumn("Date")
+        distance_column = gtk.TreeViewColumn("Distance")
+
+        runs_treeview.append_column(date_column)
+        runs_treeview.append_column(distance_column)
+
+        cell1 = gtk.CellRendererText()
+        cell2 = gtk.CellRendererText()
+
+        #date_column.add_attribute(renderer, 'text', 0)
+        #distance_column.add_attribute(renderer, 'text', 0)
+
+        date_column.pack_start(cell1, expand=False)
+        distance_column.pack_start(cell2, expand=False)
+
+        date_column.set_attributes(cell1, text=0)
+        distance_column.set_attributes(cell2, text=1)
+
+
 

@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sun Feb  8 22:57:14 2009 -->
+<!--Generated with glade3 3.4.5 on Mon Feb 16 16:09:52 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="main_window">
+    <property name="width_request">600</property>
+    <property name="height_request">400</property>
+    <property name="default_width">500</property>
+    <property name="default_height">300</property>
     <child>
       <widget class="GtkNotebook" id="notebook1">
         <property name="visible">True</property>
@@ -51,7 +55,7 @@
               </packing>
             </child>
             <child>
-              <widget class="GtkTreeView" id="treeview1">
+              <widget class="GtkTreeView" id="runs_treeview">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </widget>
