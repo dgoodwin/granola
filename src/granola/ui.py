@@ -61,6 +61,12 @@ class GranolaMainWindow:
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         main_window = self.glade_xml.get_widget('main_window')
 
+        signals = {
+            'on_quit_menu_item_activate': self.shutdown,
+            'on_main_window_destroy': self.shutdown,
+        }
+        self.glade_xml.signal_autoconnect(signals)
+
         self.session = Session()
         self.running = self.session.query(Sport).filter(
                 Sport.name == RUNNING).one()
@@ -72,6 +78,10 @@ class GranolaMainWindow:
     def main(self):
         """ Launch the GTK main loop. """
         gtk.main()
+
+    def shutdown(self, widget):
+        """ Closes the application. """
+        gtk.main_quit()
 
     def _populate_trees(self):
         self._populate_running_tab_trees()

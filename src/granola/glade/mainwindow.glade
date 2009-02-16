@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Mon Feb 16 18:33:39 2009 -->
+<!--Generated with glade3 3.4.5 on Mon Feb 16 19:02:02 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="main_window">
     <property name="width_request">600</property>
     <property name="height_request">400</property>
     <property name="default_width">500</property>
     <property name="default_height">300</property>
+    <signal name="destroy" handler="on_main_window_destroy"/>
     <child>
       <widget class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -59,11 +60,12 @@
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkImageMenuItem" id="imagemenuitem5">
+                      <widget class="GtkImageMenuItem" id="quit_menu_item">
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">gtk-quit</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="on_quit_menu_item_activate"/>
                       </widget>
                     </child>
                   </widget>
