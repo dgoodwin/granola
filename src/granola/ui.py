@@ -29,6 +29,9 @@ import os
 import sys
 
 from granola.log import log
+from granola.model import *
+
+RUNNING = "Running"
 
 def find_file_on_path(pathname):
     """
@@ -58,6 +61,10 @@ class GranolaMainWindow:
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         main_window = self.glade_xml.get_widget('main_window')
 
+        self.session = Session()
+        self.running = self.session.query(Sport).filter(
+                Sport.name == RUNNING).one()
+
         self._populate_trees()
 
         main_window.show_all()
@@ -69,39 +76,48 @@ class GranolaMainWindow:
     def _populate_trees(self):
         self._populate_running_tab_trees()
 
+    def _build_runs_liststore(self):
+        """ Return a ListStore with data for all runs. """
+        runs_liststore = gtk.ListStore(
+                str, # date
+                str, # route
+                float, # distance
+                #str, #time
+                #float, # avg speed
+                #float, # avg heart rate
+        )
+        q = self.session.query(Activity).filter(Activity.sport == 
+                self.running)
+        for run in q.all():
+            runs_liststore.append([run.start_time, "N/A", run.distance])
+        return runs_liststore
+
     def _populate_running_tab_trees(self):
         """ Populate lists on the running tab. """
-
-        runs_liststore = gtk.ListStore(
-                str, 
-                float 
-        )
-        runs_liststore.append(["2009-02-08 12:50pm", 4.67])
-        runs_liststore.append(["2009-02-09 2:50pm", 4.97])
+        runs_liststore = self._build_runs_liststore()
 
         runs_treeview = self.glade_xml.get_widget("runs_treeview")
-        print "Found treeview:"
-        print runs_treeview
         runs_treeview.set_model(runs_liststore)
 
         # Create columns:
         date_column = gtk.TreeViewColumn("Date")
+        route_column = gtk.TreeViewColumn("Route")
         distance_column = gtk.TreeViewColumn("Distance")
 
         runs_treeview.append_column(date_column)
+        runs_treeview.append_column(route_column)
         runs_treeview.append_column(distance_column)
 
         cell1 = gtk.CellRendererText()
         cell2 = gtk.CellRendererText()
 
-        #date_column.add_attribute(renderer, 'text', 0)
-        #distance_column.add_attribute(renderer, 'text', 0)
-
         date_column.pack_start(cell1, expand=False)
+        route_column.pack_start(cell1, expand=False)
         distance_column.pack_start(cell2, expand=False)
 
         date_column.set_attributes(cell1, text=0)
-        distance_column.set_attributes(cell2, text=1)
+        route_column.set_attributes(cell1, text=1)
+        distance_column.set_attributes(cell2, text=2)
 
 
 

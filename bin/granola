@@ -52,7 +52,5 @@ def main():
     ui = GranolaMainWindow()
     ui.main()
 
-
-
 if __name__ == "__main__":
     main()
