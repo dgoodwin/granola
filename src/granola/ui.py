@@ -97,12 +97,12 @@ class GranolaMainWindow:
                 #float, # avg heart rate
         )
         q = self.session.query(Activity).filter(Activity.sport == 
-                self.running)
+                self.running).order_by(Activity.start_time)
         for run in q.all():
             runs_liststore.append([
                 run.start_time, 
                 "N/A", 
-                str(run.distance / 1000)[0:5]
+                "%.2f" % (run.distance / 1000),
             ])
         return runs_liststore
 
