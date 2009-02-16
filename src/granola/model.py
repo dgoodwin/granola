@@ -134,6 +134,16 @@ class Activity(Base):
         return distance
     distance = property(_get_distance, None)
 
+    def _get_duration(self):
+        duration = None
+        for lap in self.laps:
+            if duration == None:
+                duration = lap.duration
+            else:
+                duration += lap.duration
+        return duration
+    duration = property(_get_duration, None)
+
 
 
 # TODO: Add settings table, store the schema version in it.
