@@ -81,7 +81,7 @@ class GranolaMainWindow:
         runs_liststore = gtk.ListStore(
                 str, # date
                 str, # route
-                float, # distance
+                str, # distance
                 #str, #time
                 #float, # avg speed
                 #float, # avg heart rate
@@ -89,7 +89,11 @@ class GranolaMainWindow:
         q = self.session.query(Activity).filter(Activity.sport == 
                 self.running)
         for run in q.all():
-            runs_liststore.append([run.start_time, "N/A", run.distance])
+            runs_liststore.append([
+                run.start_time, 
+                "N/A", 
+                str(run.distance / 1000)[0:5]
+            ])
         return runs_liststore
 
     def _populate_running_tab_trees(self):
@@ -102,7 +106,7 @@ class GranolaMainWindow:
         # Create columns:
         date_column = gtk.TreeViewColumn("Date")
         route_column = gtk.TreeViewColumn("Route")
-        distance_column = gtk.TreeViewColumn("Distance")
+        distance_column = gtk.TreeViewColumn("Distance (km)")
 
         runs_treeview.append_column(date_column)
         runs_treeview.append_column(route_column)

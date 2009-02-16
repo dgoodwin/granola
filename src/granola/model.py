@@ -123,16 +123,14 @@ class Activity(Base):
         self.start_time = start_time
         self.sport = sport
 
-    # PERFORMANCETODO: This is probably a terrible idea.
+    # TODO: This is probably a terrible idea for performance:
     def _get_distance(self):
-        print "DING!"
         distance = None
         for lap in self.laps:
             if distance == None:
                 distance = lap.distance
             else:
                 distance += lap.distance
-        print "Calculated distance: %s" % distance
         return distance
     distance = property(_get_distance, None)
 
