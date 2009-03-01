@@ -18,8 +18,10 @@
 #   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #   02110-1301  USA
 
+import os.path
+
 from granola.log import log
-from granola.const import DATA_DIR
+from granola.const import DATA_DIR, VERSION
 
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, \
         String, ForeignKey, Numeric, DateTime
@@ -146,7 +148,18 @@ class Activity(Base):
 
 
 
-# TODO: Add settings table, store the schema version in it.
+class Setting(Base):
+
+    __tablename__ = "setting"
+
+    name = Column(String(256), primary_key=True, unique=True)
+    value = Column(String(256))
+
+    def __init__(self, name=None, value=None):
+        self.name = name
+        self.value = value
+
+
 
 def initialize_db():
     """
@@ -168,6 +181,11 @@ def initialize_db():
         Sport("Biking"),
         Sport("Hiking"),
         Sport("Other"),
+    ])
+    session.add_all([
+        Setting("schema_version", VERSION),
+        Setting("import_folder", os.path.join(os.path.expanduser("~/"), 
+            "exports")),
     ])
     session.commit()
 
