@@ -30,6 +30,8 @@ from granola.log import log
 from granola.const import DATA_DIR, SQLITE_DB
 from granola.model import initialize_db
 
+GRANOLARC = os.path.join(DATA_DIR, "granolarc")
+
 
 def is_first_run():
     """
@@ -60,11 +62,10 @@ def read_or_create_config():
     Read configuration from granolarc, or create it with default
     settings if necessary.
     """
-    granolarc_path = os.path.join(DATA_DIR, "granolarc")
     config = ConfigParser.ConfigParser()
-    if os.path.exists(granolarc_path):
+    if os.path.exists(GRANOLARC):
         # Read in existing settings:
-        config.read(granolarc_path)
+        config.read(GRANOLARC)
 
     # Check for all required settings, if missing add a default:
     default_import_settings = {
@@ -82,10 +83,13 @@ def read_or_create_config():
 
     # Write the config back out now that we've added a default for anything 
     # that was missing:
-    f = open(granolarc_path, 'w')
+    write_config(config)
+    return config
+
+def write_config(config):
+    """ Write granolarc config to disk. """
+    f = open(GRANOLARC, 'w')
     config.write(f)
     f.close()
-
-    
 
 

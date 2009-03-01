@@ -30,6 +30,7 @@ import sys
 
 from granola.log import log
 from granola.model import *
+from granola import write_config
 
 RUNNING = "Running"
 BIKING = "Biking"
@@ -209,14 +210,48 @@ class GranolaMainWindow(object):
         return list_store
 
     def open_prefs_dialog(self, widget):
-        prefs_dialog = PreferencesDialog(self.glade_xml)
+        prefs_dialog = PreferencesDialog(self.config)
 
 
 
 class PreferencesDialog(object):
 
-    def __init__(self, glade_xml):
+    def __init__(self, config):
         log.debug("Opening Preferences dialog.")
-        preferences_dialog = glade_xml.get_widget("prefs_dialog")
-        preferences_dialog.show_all()
+        self.config = config
+
+        glade_file = 'granola/glade/prefs-dialog.glade'
+        self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
+        self.preferences_dialog = self.glade_xml.get_widget("prefs_dialog")
+
+        signals = {
+            'on_apply_button_clicked': self.apply_prefs,
+            'on_cancel_button_clicked': self.cancel,
+        }
+        self.glade_xml.signal_autoconnect(signals)
+        self.import_folder_chooser = self.glade_xml.get_widget(
+                "import_folder_filechooserbutton")
+        self.import_folder_chooser.set_filename(
+                self.config.get("import", "import_folder"))
+
+        self.preferences_dialog.show_all()
+
+    def apply_prefs(self, widget):
+        """ 
+        Callback when apply button is pressed. Write settings to disk and close
+        the window.
+        """
+        log.debug("Applying preferences.")
+        import_folder = self.import_folder_chooser.get_filename()
+        log.debug("   import_folder = %s" % import_folder)
+        self.config.set("import", "import_folder", import_folder)
+        write_config(self.config)
+        self.preferences_dialog.destroy()
+
+    def cancel(self, widget):
+        """
+        Don't apply any settings and close the window.
+        """
+        log.debug("Cancel button pressed, closing preferences dialog.")
+        self.preferences_dialog.destroy()
 
