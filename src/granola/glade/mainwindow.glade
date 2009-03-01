@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sat Feb 28 22:51:12 2009 -->
+<!--Generated with glade3 3.4.5 on Sat Feb 28 23:05:04 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="main_window">
-    <property name="width_request">600</property>
-    <property name="height_request">400</property>
+    <property name="width_request">800</property>
+    <property name="height_request">600</property>
     <property name="default_width">500</property>
     <property name="default_height">300</property>
     <signal name="destroy" handler="on_main_window_destroy"/>

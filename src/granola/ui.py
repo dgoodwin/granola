@@ -106,11 +106,13 @@ class GranolaMainWindow:
         route_column = gtk.TreeViewColumn("Route")
         distance_column = gtk.TreeViewColumn("Distance (km)")
         time_column = gtk.TreeViewColumn("Time")
+        avg_speed_column = gtk.TreeViewColumn("Speed (km/hr)")
 
         runs_treeview.append_column(date_column)
         runs_treeview.append_column(route_column)
         runs_treeview.append_column(distance_column)
         runs_treeview.append_column(time_column)
+        runs_treeview.append_column(avg_speed_column)
 
         cell = gtk.CellRendererText()
 
@@ -118,11 +120,13 @@ class GranolaMainWindow:
         route_column.pack_start(cell, expand=False)
         distance_column.pack_start(cell, expand=False)
         time_column.pack_start(cell, expand=False)
+        avg_speed_column.pack_start(cell, expand=False)
 
         date_column.set_attributes(cell, text=0)
         route_column.set_attributes(cell, text=1)
         distance_column.set_attributes(cell, text=2)
         time_column.set_attributes(cell, text=3)
+        avg_speed_column.set_attributes(cell, text=4)
 
     def _build_runs_liststore(self):
         """ Return a ListStore with data for all runs. """
@@ -131,7 +135,7 @@ class GranolaMainWindow:
                 str, # route
                 str, # distance
                 str, #time
-                #float, # avg speed
+                str, # avg speed
                 #float, # avg heart rate
         )
         q = self.session.query(Activity).filter(Activity.sport == 
@@ -147,6 +151,7 @@ class GranolaMainWindow:
                 "N/A", 
                 "%.2f" % (run.distance / 1000),
                 "%02i:%02i:%02i" % (hours, minutes, seconds),                
+                "%.2f" % ((run.distance / 1000) / (duration_seconds / 3600))
             ])
         # TODO: remove this fake data
         for l in range(100):
@@ -156,6 +161,7 @@ class GranolaMainWindow:
                 "N/A", 
                 "15",
                 "%02i:%02i:%02i" % (0, 45, 0),                
+                "5"
             ])
 
         return list_store
@@ -167,7 +173,7 @@ class GranolaMainWindow:
                 str, # route
                 str, # distance
                 str, #time
-                #float, # avg speed
+                str, # avg speed
                 #float, # avg heart rate
         )
         q = self.session.query(Activity).filter(Activity.sport == 
@@ -183,6 +189,7 @@ class GranolaMainWindow:
                 "N/A", 
                 "%.2f" % (run.distance / 1000),
                 "%02i:%02i:%02i" % (hours, minutes, seconds),                
+                "%.2f" % ((run.distance / 1000) / (duration_seconds / 3600))
             ])
         # TODO: remove this fake data
         for l in range(100):
@@ -192,6 +199,7 @@ class GranolaMainWindow:
                 "N/A", 
                 "15",
                 "%02i:%02i:%02i" % (0, 45, 0),                
+                "5"
             ])
 
 
