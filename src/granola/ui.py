@@ -148,6 +148,15 @@ class GranolaMainWindow:
                 "%.2f" % (run.distance / 1000),
                 "%02i:%02i:%02i" % (hours, minutes, seconds),                
             ])
+        # TODO: remove this fake data
+        for l in range(100):
+            import datetime
+            list_store.append([
+                datetime.datetime.now(), 
+                "N/A", 
+                "15",
+                "%02i:%02i:%02i" % (0, 45, 0),                
+            ])
 
         return list_store
 
@@ -175,6 +184,16 @@ class GranolaMainWindow:
                 "%.2f" % (run.distance / 1000),
                 "%02i:%02i:%02i" % (hours, minutes, seconds),                
             ])
+        # TODO: remove this fake data
+        for l in range(100):
+            import datetime
+            list_store.append([
+                datetime.datetime.now(), 
+                "N/A", 
+                "15",
+                "%02i:%02i:%02i" % (0, 45, 0),                
+            ])
+
 
         return list_store
 
