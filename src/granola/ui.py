@@ -32,6 +32,7 @@ from granola.log import log
 from granola.model import *
 
 RUNNING = "Running"
+BIKING = "Biking"
 
 def find_file_on_path(pathname):
     """
@@ -70,8 +71,10 @@ class GranolaMainWindow:
         self.session = Session()
         self.running = self.session.query(Sport).filter(
                 Sport.name == RUNNING).one()
+        self.biking = self.session.query(Sport).filter(
+                Sport.name == BIKING).one()
 
-        self._populate_trees()
+        self._populate_tabs()
 
         main_window.show_all()
 
@@ -83,42 +86,20 @@ class GranolaMainWindow:
         """ Closes the application. """
         gtk.main_quit()
 
-    def _populate_trees(self):
-        self._populate_running_tab_trees()
-
-    def _build_runs_liststore(self):
-        """ Return a ListStore with data for all runs. """
-        runs_liststore = gtk.ListStore(
-                str, # date
-                str, # route
-                str, # distance
-                str, #time
-                #float, # avg speed
-                #float, # avg heart rate
-        )
-        q = self.session.query(Activity).filter(Activity.sport == 
-                self.running).order_by(Activity.start_time.desc())
-        for run in q.all():
-            duration_seconds = run.duration
-            hours = duration_seconds / 3600
-            minutes = (duration_seconds / 60) % 60
-            seconds = duration_seconds % 60
-
-            runs_liststore.append([
-                run.start_time, 
-                "N/A", 
-                "%.2f" % (run.distance / 1000),
-                "%02i:%02i:%02i" % (hours, minutes, seconds),                
-            ])
-
-        return runs_liststore
-
-    def _populate_running_tab_trees(self):
-        """ Populate lists on the running tab. """
+    def _populate_tabs(self):
+        # Populate the runs
         runs_liststore = self._build_runs_liststore()
-
         runs_treeview = self.glade_xml.get_widget("runs_treeview")
         runs_treeview.set_model(runs_liststore)
+        self._populate_activity_treeview(runs_treeview)
+
+        rides_liststore = self._build_rides_liststore()
+        runs_treeview = self.glade_xml.get_widget("rides_treeview")
+        runs_treeview.set_model(rides_liststore)
+        self._populate_activity_treeview(runs_treeview)
+
+    def _populate_activity_treeview(self, runs_treeview):
+        """ Populate lists on the running tab. """
 
         # Create columns:
         date_column = gtk.TreeViewColumn("Date")
@@ -143,5 +124,57 @@ class GranolaMainWindow:
         distance_column.set_attributes(cell, text=2)
         time_column.set_attributes(cell, text=3)
 
+    def _build_runs_liststore(self):
+        """ Return a ListStore with data for all runs. """
+        list_store = gtk.ListStore(
+                str, # date
+                str, # route
+                str, # distance
+                str, #time
+                #float, # avg speed
+                #float, # avg heart rate
+        )
+        q = self.session.query(Activity).filter(Activity.sport == 
+                self.running).order_by(Activity.start_time.desc())
+        for run in q.all():
+            duration_seconds = run.duration
+            hours = duration_seconds / 3600
+            minutes = (duration_seconds / 60) % 60
+            seconds = duration_seconds % 60
 
+            list_store.append([
+                run.start_time, 
+                "N/A", 
+                "%.2f" % (run.distance / 1000),
+                "%02i:%02i:%02i" % (hours, minutes, seconds),                
+            ])
+
+        return list_store
+
+    def _build_rides_liststore(self):
+        """ Return a ListStore with data for all rides. """
+        list_store = gtk.ListStore(
+                str, # date
+                str, # route
+                str, # distance
+                str, #time
+                #float, # avg speed
+                #float, # avg heart rate
+        )
+        q = self.session.query(Activity).filter(Activity.sport == 
+                self.biking).order_by(Activity.start_time.desc())
+        for run in q.all():
+            duration_seconds = run.duration
+            hours = duration_seconds / 3600
+            minutes = (duration_seconds / 60) % 60
+            seconds = duration_seconds % 60
+
+            list_store.append([
+                run.start_time, 
+                "N/A", 
+                "%.2f" % (run.distance / 1000),
+                "%02i:%02i:%02i" % (hours, minutes, seconds),                
+            ])
+
+        return list_store
 
