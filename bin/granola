@@ -24,7 +24,7 @@ import commands
 import os
 import os.path
 
-from granola import is_first_run, initialize_granola
+from granola import is_first_run, initialize_granola, read_or_create_config
 from granola.log import log
 from granola.model import initialize_db, SQLITE_DB
 from granola.importer import GarminTcxImporter
@@ -42,6 +42,8 @@ def main():
     if is_first_run():
         initialize_granola()
 
+    config = read_or_create_config()
+
     importer = GarminTcxImporter()
     export_path = os.path.expanduser(os.path.join("~", "exports"))
     # TODO: Import on demand or automatically?
@@ -49,7 +51,7 @@ def main():
     importer.scan_dir(export_path)
     #except Exception, ex:
     #    print ex
-    ui = GranolaMainWindow()
+    ui = GranolaMainWindow(config)
     ui.main()
 
 if __name__ == "__main__":

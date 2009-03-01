@@ -24,6 +24,7 @@ granola .... yum!
 import logging
 import os
 import os.path
+import ConfigParser
 
 from granola.log import log
 from granola.const import DATA_DIR, SQLITE_DB
@@ -53,3 +54,38 @@ def initialize_granola():
         pass
 
     initialize_db()
+
+def read_or_create_config():
+    """
+    Read configuration from granolarc, or create it with default
+    settings if necessary.
+    """
+    granolarc_path = os.path.join(DATA_DIR, "granolarc")
+    config = ConfigParser.ConfigParser()
+    if os.path.exists(granolarc_path):
+        # Read in existing settings:
+        config.read(granolarc_path)
+
+    # Check for all required settings, if missing add a default:
+    default_import_settings = {
+            'import_folder': os.path.join(os.path.expanduser("~/"), 
+                "exports"),
+    }
+    if not config.has_section("import"):
+        config.add_section("import")
+    for setting in default_import_settings.keys():
+        if not config.has_option("import", setting):
+            default_value = default_import_settings[setting]
+            log.warn("Missing setting in granolarc, adding %s = %s" %
+                    (setting, default_value))
+            config.set("import", setting, default_value)
+
+    # Write the config back out now that we've added a default for anything 
+    # that was missing:
+    f = open(granolarc_path, 'w')
+    config.write(f)
+    f.close()
+
+    
+
+

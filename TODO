@@ -1,5 +1,5 @@
-- Add setup.py.
-- Package in RPM.
 - Add a schema version somewhere in the database. (for upgrades)
 - Add configuration for user friendly importing.
 - Manual activity entry.
+- Add setup.py.
+- Package in RPM.

@@ -56,8 +56,10 @@ class GranolaMainWindow(object):
     Main Granola GTK UI Window
     """
 
-    def __init__(self):
+    def __init__(self, config):
         log.debug("Starting GTK UI.")
+        self.config = config
+
         glade_file = 'granola/glade/mainwindow.glade'
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         main_window = self.glade_xml.get_widget('main_window')

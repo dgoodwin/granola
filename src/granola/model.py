@@ -148,9 +148,10 @@ class Activity(Base):
 
 
 
-class Setting(Base):
+class Constant(Base):
+    """ Store random string constants in the database. """
 
-    __tablename__ = "setting"
+    __tablename__ = "constant"
 
     name = Column(String(256), primary_key=True, unique=True)
     value = Column(String(256))
@@ -183,9 +184,7 @@ def initialize_db():
         Sport("Other"),
     ])
     session.add_all([
-        Setting("schema_version", VERSION),
-        Setting("import_folder", os.path.join(os.path.expanduser("~/"), 
-            "exports")),
+        Constant("schema_version", VERSION),
     ])
     session.commit()
 
