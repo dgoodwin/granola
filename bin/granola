@@ -45,7 +45,7 @@ def main():
     config = read_or_create_config()
 
     importer = GarminTcxImporter()
-    export_path = os.path.expanduser(os.path.join("~", "exports"))
+    export_path = config.get("import", "import_folder")
     # TODO: Import on demand or automatically?
     #try:
     importer.scan_dir(export_path)
