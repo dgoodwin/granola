@@ -51,7 +51,7 @@ def find_file_on_path(pathname):
     raise Exception("Could not find %s on the Python path."
         % pathname)
 
-class GranolaMainWindow:
+class GranolaMainWindow(object):
     """
     Main Granola GTK UI Window
     """
@@ -65,6 +65,7 @@ class GranolaMainWindow:
         signals = {
             'on_quit_menu_item_activate': self.shutdown,
             'on_main_window_destroy': self.shutdown,
+            'on_prefs_menu_item_activate': self.open_prefs_dialog,
         }
         self.glade_xml.signal_autoconnect(signals)
 
@@ -204,4 +205,16 @@ class GranolaMainWindow:
 
 
         return list_store
+
+    def open_prefs_dialog(self, widget):
+        prefs_dialog = PreferencesDialog(self.glade_xml)
+
+
+
+class PreferencesDialog(object):
+
+    def __init__(self, glade_xml):
+        log.debug("Opening Preferences dialog.")
+        preferences_dialog = glade_xml.get_widget("prefs_dialog")
+        preferences_dialog.show_all()
 
