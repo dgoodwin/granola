@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sun Mar  1 12:59:50 2009 -->
+<!--Generated with glade3 3.4.5 on Sun Mar  1 15:15:20 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="main_window">
     <property name="width_request">800</property>
@@ -132,24 +132,17 @@
                     <child>
                       <widget class="GtkLabel" id="label4">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Runs:</property>
+                        <property name="label" translatable="yes">&lt;span size="large"&gt;Runs&lt;/span&gt;</property>
+                        <property name="use_markup">True</property>
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="graph_runs_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">Graph It</property>
-                        <property name="response_id">0</property>
-                      </widget>
-                      <packing>
-                        <property name="position">1</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="padding">5</property>
                   </packing>
                 </child>
                 <child>
@@ -176,25 +169,18 @@
                     <child>
                       <widget class="GtkLabel" id="label5">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">By Month:
+                        <property name="label" translatable="yes">&lt;span size="large"&gt;Monthly Totals&lt;/span&gt;
 </property>
+                        <property name="use_markup">True</property>
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="graph_monthly_run_totals_button">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">Graph It</property>
-                        <property name="response_id">0</property>
-                      </widget>
-                      <packing>
-                        <property name="position">1</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="padding">5</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
@@ -237,24 +223,17 @@
                     <child>
                       <widget class="GtkLabel" id="label7">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Rides:</property>
+                        <property name="label" translatable="yes">&lt;span size="large"&gt;Rides&lt;/span&gt;</property>
+                        <property name="use_markup">True</property>
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="graph_runs_button1">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">Graph It</property>
-                        <property name="response_id">0</property>
-                      </widget>
-                      <packing>
-                        <property name="position">1</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="padding">5</property>
                   </packing>
                 </child>
                 <child>
@@ -281,25 +260,18 @@
                     <child>
                       <widget class="GtkLabel" id="label8">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">By Month:
+                        <property name="label" translatable="yes">&lt;span size="large"&gt;Monthly Totals&lt;/span&gt;
 </property>
+                        <property name="use_markup">True</property>
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkButton" id="graph_monthly_run_totals_button1">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="label" translatable="yes">Graph It</property>
-                        <property name="response_id">0</property>
-                      </widget>
-                      <packing>
-                        <property name="position">1</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                   </widget>
                   <packing>
                     <property name="expand">False</property>
+                    <property name="padding">5</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
