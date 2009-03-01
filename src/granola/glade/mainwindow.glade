@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sat Feb 28 23:37:57 2009 -->
+<!--Generated with glade3 3.4.5 on Sat Feb 28 23:41:26 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="main_window">
     <property name="width_request">800</property>
@@ -49,6 +49,26 @@
               </widget>
             </child>
             <child>
+              <widget class="GtkMenuItem" id="menuitem2">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">_Edit</property>
+                <property name="use_underline">True</property>
+                <child>
+                  <widget class="GtkMenu" id="menu2">
+                    <property name="visible">True</property>
+                    <child>
+                      <widget class="GtkImageMenuItem" id="imagemenuitem9">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">gtk-preferences</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </widget>
+                    </child>
+                  </widget>
+                </child>
+              </widget>
+            </child>
+            <child>
               <widget class="GtkMenuItem" id="menuitem3">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">_Tools</property>
@@ -63,6 +83,7 @@
                         <property name="use_underline">True</property>
                         <child internal-child="image">
                           <widget class="GtkImage" id="menu-item-image11">
+                            <property name="stock">gtk-missing-image</property>
                           </widget>
                         </child>
                       </widget>
@@ -100,22 +121,6 @@
           <widget class="GtkNotebook" id="notebook1">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <child>
-              <widget class="GtkLabel" id="label6">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Hello World!</property>
-              </widget>
-            </child>
-            <child>
-              <widget class="GtkLabel" id="label1">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Main</property>
-              </widget>
-              <packing>
-                <property name="type">tab</property>
-                <property name="tab_fill">False</property>
-              </packing>
-            </child>
             <child>
               <widget class="GtkVBox" id="vbox2">
                 <property name="visible">True</property>
@@ -210,9 +215,6 @@
                   </packing>
                 </child>
               </widget>
-              <packing>
-                <property name="position">1</property>
-              </packing>
             </child>
             <child>
               <widget class="GtkLabel" id="label2">
@@ -221,7 +223,6 @@
               </widget>
               <packing>
                 <property name="type">tab</property>
-                <property name="position">1</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
@@ -320,7 +321,7 @@
                 </child>
               </widget>
               <packing>
-                <property name="position">2</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -330,7 +331,7 @@
               </widget>
               <packing>
                 <property name="type">tab</property>
-                <property name="position">2</property>
+                <property name="position">1</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
