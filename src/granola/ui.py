@@ -69,6 +69,8 @@ class GranolaMainWindow(object):
             'on_quit_menu_item_activate': self.shutdown,
             'on_main_window_destroy': self.shutdown,
             'on_prefs_menu_item_activate': self.open_prefs_dialog,
+            'on_runs_treeview_button_press_event': 
+                self.on_runs_treeview_button_press_event,
         }
         self.glade_xml.signal_autoconnect(signals)
 
@@ -190,6 +192,38 @@ class GranolaMainWindow(object):
 
     def open_prefs_dialog(self, widget):
         prefs_dialog = PreferencesDialog(self.config)
+
+    def on_runs_treeview_button_press_event(self, treeview, event):
+
+        # Handle both left and right mouse button clicks:
+        if event.button == 3 or event.button == 1:
+            x = int(event.x)
+            y = int(event.y)
+            time = event.time
+
+            # Select the row:
+            pthinfo = treeview.get_path_at_pos(x, y)
+            if pthinfo is not None:
+                path, col, cellx, celly = pthinfo
+                # path[0] appears to be the row here:
+                treeview.grab_focus()
+                treeview.set_cursor(path, col, 0)
+
+            # Now handle only left clicks:
+            if event.button == 3:
+                log.debug("x = %s" % x)
+                log.debug("y = %s" % y)
+                log.debug("time = %s" % time)
+                log.debug(pthinfo)
+
+                treeselection = treeview.get_selection()
+                (model, iter) = treeselection.get_selected()
+                log.debug("model = %s" % model)
+                log.debug("iter = %s" % iter)
+                #store = treeview.get_model()
+                log.debug(model.get_value(iter, 0))
+
+        return 1
 
 
 
