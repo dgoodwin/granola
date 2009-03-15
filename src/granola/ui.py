@@ -64,6 +64,8 @@ class GranolaMainWindow(object):
         glade_file = 'granola/glade/mainwindow.glade'
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         main_window = self.glade_xml.get_widget('main_window')
+        self.activity_popup_menu = self.glade_xml.get_widget(
+                'activity_popup_menu')
 
         signals = {
             'on_quit_menu_item_activate': self.shutdown,
@@ -91,6 +93,9 @@ class GranolaMainWindow(object):
     def shutdown(self, widget):
         """ Closes the application. """
         gtk.main_quit()
+
+    def open_prefs_dialog(self, widget):
+        prefs_dialog = PreferencesDialog(self.config)
 
     def _populate_tabs(self):
         # Populate the runs
@@ -190,9 +195,6 @@ class GranolaMainWindow(object):
 
         return list_store
 
-    def open_prefs_dialog(self, widget):
-        prefs_dialog = PreferencesDialog(self.config)
-
     def on_runs_treeview_button_press_event(self, treeview, event):
 
         # Handle both left and right mouse button clicks:
@@ -217,13 +219,20 @@ class GranolaMainWindow(object):
                 log.debug(pthinfo)
 
                 treeselection = treeview.get_selection()
-                (model, iter) = treeselection.get_selected()
-                log.debug("model = %s" % model)
-                log.debug("iter = %s" % iter)
-                #store = treeview.get_model()
-                log.debug(model.get_value(iter, 0))
+                # Connect signals to menu items:
+                delete = self.glade_xml.get_widget('activity_popup_delete')
+                delete.connect_object("activate", 
+                        self.activity_popup_menu_delete, treeselection)
+                self.activity_popup_menu.popup(None, None, None, 
+                        event.button, time)
 
-        return 1
+    def activity_popup_menu_delete(self, treeselection):
+        """ 
+        Callback for when user clicks "Delete" after right clicking an
+        activity. 
+        """
+        (model, iter) = treeselection.get_selected()
+        log.debug("Deleting! %s" % model.get_value(iter,0))
 
 
 
