@@ -73,6 +73,8 @@ class GranolaMainWindow(object):
             'on_prefs_menu_item_activate': self.open_prefs_dialog,
             'on_runs_treeview_button_press_event': 
                 self.on_runs_treeview_button_press_event,
+            'on_activity_popup_delete_activate': 
+                self.activity_popup_menu_delete,
         }
         self.glade_xml.signal_autoconnect(signals)
 
@@ -83,6 +85,8 @@ class GranolaMainWindow(object):
                 Sport.name == BIKING).one()
 
         self._populate_tabs()
+
+        self.runs_tv = self.glade_xml.get_widget('runs_treeview')
 
         main_window.show_all()
 
@@ -218,19 +222,15 @@ class GranolaMainWindow(object):
                 log.debug("time = %s" % time)
                 log.debug(pthinfo)
 
-                treeselection = treeview.get_selection()
-                # Connect signals to menu items:
-                delete = self.glade_xml.get_widget('activity_popup_delete')
-                delete.connect_object("activate", 
-                        self.activity_popup_menu_delete, treeselection)
                 self.activity_popup_menu.popup(None, None, None, 
                         event.button, time)
 
-    def activity_popup_menu_delete(self, treeselection):
+    def activity_popup_menu_delete(self, widget):
         """ 
         Callback for when user clicks "Delete" after right clicking an
         activity. 
         """
+        treeselection = self.runs_tv.get_selection()
         (model, iter) = treeselection.get_selected()
         log.debug("Deleting! %s" % model.get_value(iter,0))
 
