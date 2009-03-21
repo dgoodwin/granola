@@ -94,7 +94,7 @@ class Lap(Base):
     heart_rate_max = Column(Integer) # beats per minute
     heart_rate_avg = Column(Integer) # beats per minute
 
-    trackpoints = relation(TrackPoint)
+    trackpoints = relation(TrackPoint, cascade="all")
 
     def __init__(self, start_time=None, duration=None, distance=None,
             speed_max=None, calories=None, heart_rate_max=None, 
@@ -118,7 +118,7 @@ class Activity(Base):
     start_time = Column(DateTime(timezone=True), nullable=False, unique=True)
     sport_id = Column(Integer, ForeignKey('sport.id'), nullable=False)
 
-    sport = relation(Sport, cascade="all")
+    sport = relation(Sport)
     laps = relation(Lap, cascade="all")
 
     def __init__(self, start_time=None, sport=None):
