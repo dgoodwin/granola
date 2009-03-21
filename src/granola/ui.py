@@ -70,15 +70,21 @@ class GranolaMainWindow(object):
                 'activity_popup_menu')
         self.running_tv = self.glade_xml.get_widget('runs_treeview')
         self.cycling_tv = self.glade_xml.get_widget('rides_treeview')
+        
+        # Kinda hacky, used to refer to current treeview so we can re-use
+        # the menu code between all activity types.
+        self.active_tv = None
 
         signals = {
             'on_quit_menu_item_activate': self.shutdown,
             'on_main_window_destroy': self.shutdown,
             'on_prefs_menu_item_activate': self.open_prefs_dialog,
             'on_runs_treeview_button_press_event': 
-                self.on_runs_treeview_button_press_event,
+                self.activity_tv_mouse_button_cb,
+            'on_rides_treeview_button_press_event': 
+                self.activity_tv_mouse_button_cb,
             'on_activity_popup_delete_activate': 
-                self.activity_popup_menu_delete,
+                self.activity_delete_cb,
         }
         self.glade_xml.signal_autoconnect(signals)
 
@@ -175,7 +181,7 @@ class GranolaMainWindow(object):
 
         return list_store
 
-    def on_runs_treeview_button_press_event(self, treeview, event):
+    def activity_tv_mouse_button_cb(self, treeview, event):
 
         # Handle both left and right mouse button clicks:
         if event.button == 3 or event.button == 1:
@@ -191,17 +197,17 @@ class GranolaMainWindow(object):
                 treeview.grab_focus()
                 treeview.set_cursor(path, col, 0)
 
-            # Now handle only left clicks:
+            # Now handle only right clicks:
             if event.button == 3:
                 self.activity_popup_menu.popup(None, None, None, 
                         event.button, time)
+                self.activity_tv = treeview
 
-    def activity_popup_menu_delete(self, widget):
+    def activity_delete_cb(self, widget):
         """ 
-        Callback for when user clicks "Delete" after right clicking an
-        activity. 
+        Callback for when user selected delete from the activity popup menu.
         """
-        treeselection = self.running_tv.get_selection()
+        treeselection = self.activity_tv.get_selection()
         (model, iter) = treeselection.get_selected()
         query = self.session.query(Activity).filter(Activity.id == 
                 model.get_value(iter, 0))
