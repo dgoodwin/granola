@@ -1,10 +1,7 @@
 - Manual activity entry.
-- Right click context menu on activities.
 - Display in Google Maps.
 - Display monthly totals.
 - Import on demand, not at start.
-- Better tracking for what's been imported. (i.e. don't re-import deleted activites)
-  - Imported table, type + string, i.e. type 1 and a filename.
 - Allow import of specific file(s).
 
 - Setup project page.
