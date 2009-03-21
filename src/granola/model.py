@@ -118,12 +118,16 @@ class Activity(Base):
     start_time = Column(DateTime(timezone=True), nullable=False, unique=True)
     sport_id = Column(Integer, ForeignKey('sport.id'), nullable=False)
 
-    sport = relation(Sport)
-    laps = relation(Lap)
+    sport = relation(Sport, cascade="all")
+    laps = relation(Lap, cascade="all")
 
     def __init__(self, start_time=None, sport=None):
         self.start_time = start_time
         self.sport = sport
+
+    def __repr__(self):
+        return "Activity<%s - %s>" % \
+                (self.id, self.start_time)
 
     # TODO: This is probably a terrible idea for performance:
     def _get_distance(self):

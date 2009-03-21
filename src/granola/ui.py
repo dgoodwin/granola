@@ -64,8 +64,12 @@ class GranolaMainWindow(object):
         glade_file = 'granola/glade/mainwindow.glade'
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         main_window = self.glade_xml.get_widget('main_window')
+
+        # References to various widgets used throughout the class:
         self.activity_popup_menu = self.glade_xml.get_widget(
                 'activity_popup_menu')
+        self.running_tv = self.glade_xml.get_widget('runs_treeview')
+        self.cycling_tv = self.glade_xml.get_widget('rides_treeview')
 
         signals = {
             'on_quit_menu_item_activate': self.shutdown,
@@ -86,8 +90,6 @@ class GranolaMainWindow(object):
 
         self._populate_tabs()
 
-        self.runs_tv = self.glade_xml.get_widget('runs_treeview')
-
         main_window.show_all()
 
     def main(self):
@@ -103,18 +105,16 @@ class GranolaMainWindow(object):
 
     def _populate_tabs(self):
         # Populate the runs
-        runs_liststore = self._build_runs_liststore()
-        runs_treeview = self.glade_xml.get_widget("runs_treeview")
-        runs_treeview.set_model(runs_liststore)
-        self._populate_activity_treeview(runs_treeview)
+        running_liststore = self.build_activity_liststore(self.running)
+        self.running_tv.set_model(running_liststore)
+        self._populate_activity_treeview(self.running_tv)
 
-        rides_liststore = self._build_rides_liststore()
-        runs_treeview = self.glade_xml.get_widget("rides_treeview")
-        runs_treeview.set_model(rides_liststore)
-        self._populate_activity_treeview(runs_treeview)
+        cycling_liststore = self.build_activity_liststore(self.biking)
+        self.cycling_tv.set_model(cycling_liststore)
+        self._populate_activity_treeview(self.cycling_tv)
 
-    def _populate_activity_treeview(self, runs_treeview):
-        """ Populate lists on the running tab. """
+    def _populate_activity_treeview(self, tv):
+        """ Populate activity lists into the given treeview. """
 
         # Create columns:
         date_column = gtk.TreeViewColumn("Date")
@@ -123,11 +123,11 @@ class GranolaMainWindow(object):
         time_column = gtk.TreeViewColumn("Time")
         avg_speed_column = gtk.TreeViewColumn("Speed (km/hr)")
 
-        runs_treeview.append_column(date_column)
-        runs_treeview.append_column(route_column)
-        runs_treeview.append_column(distance_column)
-        runs_treeview.append_column(time_column)
-        runs_treeview.append_column(avg_speed_column)
+        tv.append_column(date_column)
+        tv.append_column(route_column)
+        tv.append_column(distance_column)
+        tv.append_column(time_column)
+        tv.append_column(avg_speed_column)
 
         cell = gtk.CellRendererText()
 
@@ -137,15 +137,18 @@ class GranolaMainWindow(object):
         time_column.pack_start(cell, expand=False)
         avg_speed_column.pack_start(cell, expand=False)
 
-        date_column.set_attributes(cell, text=0)
-        route_column.set_attributes(cell, text=1)
-        distance_column.set_attributes(cell, text=2)
-        time_column.set_attributes(cell, text=3)
-        avg_speed_column.set_attributes(cell, text=4)
+        date_column.set_attributes(cell, text=1)
+        route_column.set_attributes(cell, text=2)
+        distance_column.set_attributes(cell, text=3)
+        time_column.set_attributes(cell, text=4)
+        avg_speed_column.set_attributes(cell, text=5)
 
-    def _build_runs_liststore(self):
-        """ Return a ListStore with data for all runs. """
+    def build_activity_liststore(self, sport):
+        """ 
+        Return a ListStore with data for all activities of the given sport. 
+        """
         list_store = gtk.ListStore(
+                int, # id
                 str, # date
                 str, # route
                 str, # distance
@@ -154,7 +157,7 @@ class GranolaMainWindow(object):
                 #float, # avg heart rate
         )
         q = self.session.query(Activity).filter(Activity.sport == 
-                self.running).order_by(Activity.start_time.desc())
+                sport).order_by(Activity.start_time.desc())
         for run in q.all():
             duration_seconds = run.duration
             hours = duration_seconds / 3600
@@ -162,34 +165,7 @@ class GranolaMainWindow(object):
             seconds = duration_seconds % 60
 
             list_store.append([
-                run.start_time, 
-                "N/A", 
-                "%.2f" % (run.distance / 1000),
-                "%02i:%02i:%02i" % (hours, minutes, seconds),                
-                "%.2f" % ((run.distance / 1000) / (duration_seconds / 3600))
-            ])
-
-        return list_store
-
-    def _build_rides_liststore(self):
-        """ Return a ListStore with data for all rides. """
-        list_store = gtk.ListStore(
-                str, # date
-                str, # route
-                str, # distance
-                str, #time
-                str, # avg speed
-                #float, # avg heart rate
-        )
-        q = self.session.query(Activity).filter(Activity.sport == 
-                self.biking).order_by(Activity.start_time.desc())
-        for run in q.all():
-            duration_seconds = run.duration
-            hours = duration_seconds / 3600
-            minutes = (duration_seconds / 60) % 60
-            seconds = duration_seconds % 60
-
-            list_store.append([
+                run.id,
                 run.start_time, 
                 "N/A", 
                 "%.2f" % (run.distance / 1000),
@@ -230,9 +206,14 @@ class GranolaMainWindow(object):
         Callback for when user clicks "Delete" after right clicking an
         activity. 
         """
-        treeselection = self.runs_tv.get_selection()
+        treeselection = self.running_tv.get_selection()
         (model, iter) = treeselection.get_selected()
-        log.debug("Deleting! %s" % model.get_value(iter,0))
+        query = self.session.query(Activity).filter(Activity.id == 
+                model.get_value(iter, 0))
+        delete_me = query.one() # will error if not exactly one row returned
+        log.debug("Deleting! %s" % delete_me)
+        self.session.delete(delete_me)
+        self.session.commit()
 
 
 
