@@ -90,14 +90,16 @@ class GarminTcxImporter(Importer):
         if not os.path.exists(filename):
             raise Exception("No such file: %s" % filename)
 
+        base_filename = os.path.basename(filename)
+
         # Check if we've imported this file before. Assume
         # if an activity exists with a start time equal to the 
         # file name, that way we dont waste time parsing
         # the XML.
-        start_time = dateutil.parser.parse(os.path.basename(filename)[0:-4])
-        if session.query(Activity).filter(Activity.start_time == 
-                start_time).first():
-            log.info("Skipping: %s" % start_time)
+        start_time = dateutil.parser.parse(base_filename[0:-4])
+        if session.query(Import).filter(Import.identifier == 
+                base_filename).first():
+            log.info("Skipping: %s" % base_filename)
             return
 
         log.info("Importing: %s" % filename)
@@ -111,6 +113,13 @@ class GarminTcxImporter(Importer):
                     filename)
         for activity_elem in activities_elem.findall(self._get_tag("Activity")):
             self._parse_activity(session, activity_elem)
+
+        # Store that we've imported this file in the past, allowing us to 
+        # delete in the UI without re-importing it if the file is still laying
+        # around in the directory. Manual file import should be made available
+        # at some point to correct any delete mistakes.
+        imp = Import(1, base_filename)
+        session.add(imp)
 
     def _parse_activity(self, session, activity_elem):
         """ Parse an XML activity element. """

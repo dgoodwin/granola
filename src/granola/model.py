@@ -166,6 +166,29 @@ class Constant(Base):
 
 
 
+class Import(Base):
+    """ 
+    Items we've automatically imported. Identified by a type and a string.
+
+    TODO: May want to push this to the db if the types expand at all.
+    1 = file
+    """
+    __tablename__ = "import"
+
+    id = Column(Integer, primary_key=True)
+    
+    # Type of the auto-import, 1 = file for now.
+    import_type = Column(Integer)
+
+    # Some kind of identifier for what was imported, typically a filename.
+    identifier = Column(String(256))
+
+    def __init__(self, import_type, identifier):
+        self.import_type = import_type
+        self.identifier = identifier
+
+
+
 def initialize_db():
     """
     Open the database, presumably for the first time, and populate the schema. 
