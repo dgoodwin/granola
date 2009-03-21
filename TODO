@@ -1,11 +1,19 @@
+=== High Priority ===
+
+- Switch to displaying all activity types on one screen + filter dropdown. 
 - Display activity details in bottom half of tabs.
-- Sort out a way to display monthly and yearly totals.
-- Manual activity entry.
 - Display in Google Maps.
-- Display monthly totals.
-- Import on demand, not at start.
-- Allow import of specific file(s).
+
+=== Medium Priority === 
 
 - Setup project page.
 - Add setup.py.
 - Package in RPM.
+- Sort out a way to display monthly and yearly totals.
+- Import on demand, not at start.
+- Allow import of specific file(s).
+
+=== Low Priority ===
+
+- Manual activity entry.
+- Add pagination.
