@@ -88,7 +88,7 @@ class GranolaMainWindow(object):
         self.biking = self.session.query(Sport).filter(
                 Sport.name == BIKING).one()
 
-        self._populate_tabs()
+        self.populate_tabs()
 
         main_window.show_all()
 
@@ -103,17 +103,17 @@ class GranolaMainWindow(object):
     def open_prefs_dialog(self, widget):
         prefs_dialog = PreferencesDialog(self.config)
 
-    def _populate_tabs(self):
+    def populate_tabs(self):
         # Populate the runs
         running_liststore = self.build_activity_liststore(self.running)
         self.running_tv.set_model(running_liststore)
-        self._populate_activity_treeview(self.running_tv)
+        self.populate_activity_treeview(self.running_tv)
 
         cycling_liststore = self.build_activity_liststore(self.biking)
         self.cycling_tv.set_model(cycling_liststore)
-        self._populate_activity_treeview(self.cycling_tv)
+        self.populate_activity_treeview(self.cycling_tv)
 
-    def _populate_activity_treeview(self, tv):
+    def populate_activity_treeview(self, tv):
         """ Populate activity lists into the given treeview. """
 
         # Create columns:
@@ -193,11 +193,6 @@ class GranolaMainWindow(object):
 
             # Now handle only left clicks:
             if event.button == 3:
-                log.debug("x = %s" % x)
-                log.debug("y = %s" % y)
-                log.debug("time = %s" % time)
-                log.debug(pthinfo)
-
                 self.activity_popup_menu.popup(None, None, None, 
                         event.button, time)
 
@@ -214,6 +209,10 @@ class GranolaMainWindow(object):
         log.debug("Deleting! %s" % delete_me)
         self.session.delete(delete_me)
         self.session.commit()
+
+        # TODO: More expensive than it needs to be, could just delete row from
+        # model? Or just repopulate the tab we're on.
+        self.populate_tabs()
 
 
 
