@@ -32,8 +32,8 @@ from granola.log import log
 from granola.model import *
 from granola import write_config
 
-RUNNING = "Running"
-BIKING = "Biking"
+RUNNING = "running"
+BIKING = "biking"
 
 def find_file_on_path(pathname):
     """
@@ -68,20 +68,13 @@ class GranolaMainWindow(object):
         # References to various widgets used throughout the class:
         self.activity_popup_menu = self.glade_xml.get_widget(
                 'activity_popup_menu')
-        self.running_tv = self.glade_xml.get_widget('runs_treeview')
-        self.cycling_tv = self.glade_xml.get_widget('rides_treeview')
+        self.activity_tv = self.glade_xml.get_widget('activity_treeview')
         
-        # Kinda hacky, used to refer to current treeview so we can re-use
-        # the menu code between all activity types.
-        self.active_tv = None
-
         signals = {
             'on_quit_menu_item_activate': self.shutdown,
             'on_main_window_destroy': self.shutdown,
             'on_prefs_menu_item_activate': self.open_prefs_dialog,
-            'on_runs_treeview_button_press_event': 
-                self.activity_tv_mouse_button_cb,
-            'on_rides_treeview_button_press_event': 
+            'on_activity_treeview_button_press_event': 
                 self.activity_tv_mouse_button_cb,
             'on_activity_popup_delete_activate': 
                 self.activity_delete_cb,
@@ -94,7 +87,7 @@ class GranolaMainWindow(object):
         self.biking = self.session.query(Sport).filter(
                 Sport.name == BIKING).one()
 
-        self.populate_tabs()
+        self.populate_activities()
 
         main_window.show_all()
 
@@ -109,47 +102,44 @@ class GranolaMainWindow(object):
     def open_prefs_dialog(self, widget):
         prefs_dialog = PreferencesDialog(self.config)
 
-    def populate_tabs(self):
-        # Populate the runs
-        running_liststore = self.build_activity_liststore(self.running)
-        self.running_tv.set_model(running_liststore)
-        self.populate_activity_treeview(self.running_tv)
+    def populate_activities(self):
+        """ Populate activity list. """
 
-        cycling_liststore = self.build_activity_liststore(self.biking)
-        self.cycling_tv.set_model(cycling_liststore)
-        self.populate_activity_treeview(self.cycling_tv)
-
-    def populate_activity_treeview(self, tv):
-        """ Populate activity lists into the given treeview. """
+        running_liststore = self.build_activity_liststore()
+        self.activity_tv.set_model(running_liststore)
 
         # Create columns:
+        sport_column = gtk.TreeViewColumn("Sport")
         date_column = gtk.TreeViewColumn("Date")
         route_column = gtk.TreeViewColumn("Route")
         distance_column = gtk.TreeViewColumn("Distance (km)")
         time_column = gtk.TreeViewColumn("Time")
         avg_speed_column = gtk.TreeViewColumn("Speed (km/hr)")
 
-        tv.append_column(date_column)
-        tv.append_column(route_column)
-        tv.append_column(distance_column)
-        tv.append_column(time_column)
-        tv.append_column(avg_speed_column)
+        self.activity_tv.append_column(sport_column)
+        self.activity_tv.append_column(date_column)
+        self.activity_tv.append_column(route_column)
+        self.activity_tv.append_column(distance_column)
+        self.activity_tv.append_column(time_column)
+        self.activity_tv.append_column(avg_speed_column)
 
         cell = gtk.CellRendererText()
 
+        sport_column.pack_start(cell, expand=False)
         date_column.pack_start(cell, expand=False)
         route_column.pack_start(cell, expand=False)
         distance_column.pack_start(cell, expand=False)
         time_column.pack_start(cell, expand=False)
         avg_speed_column.pack_start(cell, expand=False)
 
+        sport_column.set_attributes(cell, text=6)
         date_column.set_attributes(cell, text=1)
         route_column.set_attributes(cell, text=2)
         distance_column.set_attributes(cell, text=3)
         time_column.set_attributes(cell, text=4)
         avg_speed_column.set_attributes(cell, text=5)
 
-    def build_activity_liststore(self, sport):
+    def build_activity_liststore(self):
         """ 
         Return a ListStore with data for all activities of the given sport. 
         """
@@ -160,10 +150,12 @@ class GranolaMainWindow(object):
                 str, # distance
                 str, #time
                 str, # avg speed
+                str, # sport
                 #float, # avg heart rate
         )
-        q = self.session.query(Activity).filter(Activity.sport == 
-                sport).order_by(Activity.start_time.desc())
+        q = self.session.query(Activity).order_by(Activity.start_time.desc())
+        #q = self.session.query(Activity).filter(Activity.sport == 
+        #        sport).order_by(Activity.start_time.desc())
         for run in q.all():
             duration_seconds = run.duration
             hours = duration_seconds / 3600
@@ -176,10 +168,24 @@ class GranolaMainWindow(object):
                 "N/A", 
                 "%.2f" % (run.distance / 1000),
                 "%02i:%02i:%02i" % (hours, minutes, seconds),                
-                "%.2f" % ((run.distance / 1000) / (duration_seconds / 3600))
+                "%.2f" % ((run.distance / 1000) / (duration_seconds / 3600)),
+                run.sport.name,
             ])
 
         return list_store
+
+    def display_activity(self, activity):
+        """ 
+        Display an activities details. (below the activities list)
+        """
+        start_time_widget = self.glade_xml.get_widget('activity_date_display')
+        time_widget = self.glade_xml.get_widget('activity_time_display')
+        distance_widget = self.glade_xml.get_widget('activity_distance_display')
+        speed_widget = self.glade_xml.get_widget('activity_speed_display')
+        pace_widget = self.glade_xml.get_widget('activity_pace_display')
+        avg_hr_widget = self.glade_xml.get_widget('activity_hr_display')
+
+        start_time_widget.set_text(str(activity.start_time))
 
     def activity_tv_mouse_button_cb(self, treeview, event):
 
@@ -196,6 +202,12 @@ class GranolaMainWindow(object):
                 # path[0] appears to be the row here:
                 treeview.grab_focus()
                 treeview.set_cursor(path, col, 0)
+                selection = self.activity_tv.get_selection()
+                (model, iter) = selection.get_selected()
+                # Lookup the activity object rather than rely on model columns:
+                activity = self.session.query(Activity).filter(Activity.id ==
+                        model.get_value(iter, 0)).one()
+                self.display_activity(activity)
 
             # Now handle only right clicks:
             if event.button == 3:
@@ -217,8 +229,8 @@ class GranolaMainWindow(object):
         self.session.commit()
 
         # TODO: More expensive than it needs to be, could just delete row from
-        # model? Or just repopulate the tab we're on.
-        self.populate_tabs()
+        # model?
+        self.populate_activities()
 
 
 

@@ -205,10 +205,10 @@ def initialize_db():
 
     # Populate the schema:
     session.add_all([
-        Sport("Running"),
-        Sport("Biking"),
-        Sport("Hiking"),
-        Sport("Other"),
+        Sport("running"),
+        Sport("biking"),
+        Sport("hiking"),
+        Sport("other"),
     ])
     session.add_all([
         Constant("schema_version", VERSION),
