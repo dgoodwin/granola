@@ -185,7 +185,22 @@ class GranolaMainWindow(object):
         pace_widget = self.glade_xml.get_widget('activity_pace_display')
         avg_hr_widget = self.glade_xml.get_widget('activity_hr_display')
 
+        duration_seconds = activity.duration
+        hours = duration_seconds / 3600
+        minutes = (duration_seconds / 60) % 60
+        seconds = duration_seconds % 60
+
         start_time_widget.set_text(str(activity.start_time))
+        time_widget.set_text("%02i:%02i:%02i" % (hours, minutes, seconds)) 
+        distance_widget.set_text("%.2f km" % (activity.distance / 1000))
+        speed_widget.set_text("%.2f km/hr" % ((activity.distance / 1000) / 
+            (duration_seconds / 3600)))
+        pace_widget.set_text("-")
+
+        avg_hr = "-" # activity may not have heart rate data
+        if activity.heart_rate_avg is not None:
+            avg_hr = "%.0f" % activity.heart_rate_avg
+        avg_hr_widget.set_text(avg_hr)
 
     def activity_tv_mouse_button_cb(self, treeview, event):
 

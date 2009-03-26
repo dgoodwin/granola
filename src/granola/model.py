@@ -129,7 +129,7 @@ class Activity(Base):
         return "Activity<%s - %s>" % \
                 (self.id, self.start_time)
 
-    # TODO: This is probably a terrible idea for performance:
+    # TODO: All these properties are probably not the best performance wise:
     def _get_distance(self):
         distance = None
         for lap in self.laps:
@@ -149,6 +149,15 @@ class Activity(Base):
                 duration += lap.duration
         return duration
     duration = property(_get_duration, None)
+
+    def _get_heart_rate_avg(self):
+        beats = 0
+        for lap in self.laps:
+            if lap.heart_rate_avg is None:
+                return None
+            beats = beats + (lap.heart_rate_avg * (lap.duration / 60))
+        return beats / (self.duration / 60)
+    heart_rate_avg = property(_get_heart_rate_avg, None)
 
 
 
