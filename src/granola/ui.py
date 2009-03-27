@@ -81,6 +81,8 @@ class GranolaMainWindow(object):
         }
         self.glade_xml.signal_autoconnect(signals)
 
+        self.init_ui()
+
         self.session = Session()
         self.running = self.session.query(Sport).filter(
                 Sport.name == RUNNING).one()
@@ -98,6 +100,44 @@ class GranolaMainWindow(object):
     def shutdown(self, widget):
         """ Closes the application. """
         gtk.main_quit()
+
+    def init_ui(self):
+        """
+        Initialize some UI components, things we need to do just once.
+        """
+        self.lap_tv = self.glade_xml.get_widget('lap_treeview')
+
+        # Create columns:
+        number_column = gtk.TreeViewColumn("Lap")
+        distance_column = gtk.TreeViewColumn("Distance (km)")
+        time_column = gtk.TreeViewColumn("Time")
+        avg_speed_column = gtk.TreeViewColumn("Speed (km/hr)")
+        avg_hr_column = gtk.TreeViewColumn("Avg HR")
+        max_hr_column = gtk.TreeViewColumn("Max HR")
+
+        self.lap_tv.append_column(number_column)
+        self.lap_tv.append_column(distance_column)
+        self.lap_tv.append_column(time_column)
+        self.lap_tv.append_column(avg_speed_column)
+        self.lap_tv.append_column(avg_hr_column)
+        self.lap_tv.append_column(max_hr_column)
+
+        cell = gtk.CellRendererText()
+
+        number_column.pack_start(cell, expand=False)
+        distance_column.pack_start(cell, expand=False)
+        time_column.pack_start(cell, expand=False)
+        avg_speed_column.pack_start(cell, expand=False)
+        avg_hr_column.pack_start(cell, expand=False)
+        max_hr_column.pack_start(cell, expand=False)
+
+        number_column.set_attributes(cell, text=0)
+        distance_column.set_attributes(cell, text=1)
+        time_column.set_attributes(cell, text=2)
+        avg_speed_column.set_attributes(cell, text=3)
+        avg_hr_column.set_attributes(cell, text=4)
+        max_hr_column.set_attributes(cell, text=5)
+
 
     def open_prefs_dialog(self, widget):
         prefs_dialog = PreferencesDialog(self.config)
@@ -201,6 +241,36 @@ class GranolaMainWindow(object):
         if activity.heart_rate_avg is not None:
             avg_hr = "%.0f" % activity.heart_rate_avg
         avg_hr_widget.set_text(avg_hr)
+
+        lap_liststore = gtk.ListStore(
+                int, # lap number
+                str, # distance
+                str, # time
+                str, # speed
+                str, # avg hr
+                str, # max hr
+        )
+        q = self.session.query(Lap)
+        q = q.filter(Lap.activity == activity)
+        q = q.order_by(Lap.start_time)
+        i = 1
+        for lap in q.all():
+            duration_seconds = lap.duration
+            hours = duration_seconds / 3600
+            minutes = (duration_seconds / 60) % 60
+            seconds = duration_seconds % 60
+
+            lap_liststore.append([
+                i,
+                "%.2f" % (lap.distance / 1000),
+                "%02i:%02i:%02i" % (hours, minutes, seconds),                
+                "%.2f" % ((lap.distance / 1000) / (duration_seconds / 3600)),
+                lap.heart_rate_avg,
+                lap.heart_rate_max,
+            ])
+            i += 1
+
+        self.lap_tv.set_model(lap_liststore)
 
     def activity_tv_mouse_button_cb(self, treeview, event):
 

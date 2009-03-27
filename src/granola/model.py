@@ -119,7 +119,7 @@ class Activity(Base):
     sport_id = Column(Integer, ForeignKey('sport.id'), nullable=False)
 
     sport = relation(Sport)
-    laps = relation(Lap, cascade="all")
+    laps = relation(Lap, cascade="all", backref='activity')
 
     def __init__(self, start_time=None, sport=None):
         self.start_time = start_time
