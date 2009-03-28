@@ -105,9 +105,41 @@ class GranolaMainWindow(object):
         """
         Initialize some UI components, things we need to do just once.
         """
+        # Setup activity treeview columns:
+        sport_column = gtk.TreeViewColumn("Sport")
+        date_column = gtk.TreeViewColumn("Date")
+        route_column = gtk.TreeViewColumn("Route")
+        distance_column = gtk.TreeViewColumn("Distance (km)")
+        time_column = gtk.TreeViewColumn("Time")
+        avg_speed_column = gtk.TreeViewColumn("Speed (km/hr)")
+
+        self.activity_tv.append_column(sport_column)
+        self.activity_tv.append_column(date_column)
+        self.activity_tv.append_column(route_column)
+        self.activity_tv.append_column(distance_column)
+        self.activity_tv.append_column(time_column)
+        self.activity_tv.append_column(avg_speed_column)
+
+        cell = gtk.CellRendererText()
+
+        sport_column.pack_start(cell, expand=False)
+        date_column.pack_start(cell, expand=False)
+        route_column.pack_start(cell, expand=False)
+        distance_column.pack_start(cell, expand=False)
+        time_column.pack_start(cell, expand=False)
+        avg_speed_column.pack_start(cell, expand=False)
+
+        sport_column.set_attributes(cell, text=6)
+        date_column.set_attributes(cell, text=1)
+        route_column.set_attributes(cell, text=2)
+        distance_column.set_attributes(cell, text=3)
+        time_column.set_attributes(cell, text=4)
+        avg_speed_column.set_attributes(cell, text=5)
+
+
         self.lap_tv = self.glade_xml.get_widget('lap_treeview')
 
-        # Create columns:
+        # Setup lap treeview columns:
         number_column = gtk.TreeViewColumn("Lap")
         distance_column = gtk.TreeViewColumn("Distance (km)")
         time_column = gtk.TreeViewColumn("Time")
@@ -138,7 +170,6 @@ class GranolaMainWindow(object):
         avg_hr_column.set_attributes(cell, text=4)
         max_hr_column.set_attributes(cell, text=5)
 
-
     def open_prefs_dialog(self, widget):
         prefs_dialog = PreferencesDialog(self.config)
 
@@ -147,37 +178,6 @@ class GranolaMainWindow(object):
 
         running_liststore = self.build_activity_liststore()
         self.activity_tv.set_model(running_liststore)
-
-        # Create columns:
-        sport_column = gtk.TreeViewColumn("Sport")
-        date_column = gtk.TreeViewColumn("Date")
-        route_column = gtk.TreeViewColumn("Route")
-        distance_column = gtk.TreeViewColumn("Distance (km)")
-        time_column = gtk.TreeViewColumn("Time")
-        avg_speed_column = gtk.TreeViewColumn("Speed (km/hr)")
-
-        self.activity_tv.append_column(sport_column)
-        self.activity_tv.append_column(date_column)
-        self.activity_tv.append_column(route_column)
-        self.activity_tv.append_column(distance_column)
-        self.activity_tv.append_column(time_column)
-        self.activity_tv.append_column(avg_speed_column)
-
-        cell = gtk.CellRendererText()
-
-        sport_column.pack_start(cell, expand=False)
-        date_column.pack_start(cell, expand=False)
-        route_column.pack_start(cell, expand=False)
-        distance_column.pack_start(cell, expand=False)
-        time_column.pack_start(cell, expand=False)
-        avg_speed_column.pack_start(cell, expand=False)
-
-        sport_column.set_attributes(cell, text=6)
-        date_column.set_attributes(cell, text=1)
-        route_column.set_attributes(cell, text=2)
-        distance_column.set_attributes(cell, text=3)
-        time_column.set_attributes(cell, text=4)
-        avg_speed_column.set_attributes(cell, text=5)
 
     def build_activity_liststore(self):
         """ 
