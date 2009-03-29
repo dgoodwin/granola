@@ -2,6 +2,7 @@
 
 - Switch to displaying all activity types on one screen + filter dropdown. 
 - Display activity details in bottom half of tabs.
+- Display stats tab.
 - Display in Google Maps.
 
 === Medium Priority === 
