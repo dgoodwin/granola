@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sun Mar 29 10:31:28 2009 -->
+<!--Generated with glade3 3.4.5 on Sun Mar 29 10:36:24 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="main_window">
     <property name="width_request">800</property>
@@ -153,6 +153,7 @@
                     <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
                     <child>
                       <widget class="GtkTreeView" id="activity_treeview">
+                        <property name="height_request">250</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <signal name="button_press_event" handler="on_activity_treeview_button_press_event"/>
@@ -347,10 +348,18 @@
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkTreeView" id="lap_treeview">
-                        <property name="width_request">500</property>
+                      <widget class="GtkScrolledWindow" id="scrolledwindow2">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="hscrollbar_policy">GTK_POLICY_NEVER</property>
+                        <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+                        <child>
+                          <widget class="GtkTreeView" id="lap_treeview">
+                            <property name="width_request">500</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                          </widget>
+                        </child>
                       </widget>
                       <packing>
                         <property name="position">1</property>
