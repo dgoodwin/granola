@@ -6,7 +6,6 @@
 === Medium Priority === 
 
 - Setup project page.
-- Add setup.py.
 - Package in RPM.
 - Sort out a way to display monthly and yearly totals.
 - Import on demand, not at start.

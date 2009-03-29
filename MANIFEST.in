@@ -1,0 +1,6 @@
+include requirements.txt
+include TODO
+include MANIFEST.in
+recursive-include src/granola/glade/ *
+recursive-include bin *
+recursive-include conf *
