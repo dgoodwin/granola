@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sun Mar 29 10:18:23 2009 -->
+<!--Generated with glade3 3.4.5 on Sun Mar 29 10:31:28 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="main_window">
     <property name="width_request">800</property>
@@ -336,7 +336,7 @@
                               <widget class="GtkLabel" id="activity_date_label">
                                 <property name="visible">True</property>
                                 <property name="xalign">1</property>
-                                <property name="label" translatable="yes">Start Time:</property>
+                                <property name="label" translatable="yes">Date:</property>
                               </widget>
                             </child>
                           </widget>

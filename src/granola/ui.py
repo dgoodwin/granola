@@ -204,7 +204,7 @@ class GranolaMainWindow(object):
 
             list_store.append([
                 run.id,
-                run.start_time, 
+                run.start_time.strftime("%Y-%m-%d"),
                 "N/A", 
                 "%.2f" % (run.distance / 1000),
                 "%02i:%02i:%02i" % (hours, minutes, seconds),                
@@ -230,7 +230,8 @@ class GranolaMainWindow(object):
         minutes = (duration_seconds / 60) % 60
         seconds = duration_seconds % 60
 
-        start_time_widget.set_text(str(activity.start_time))
+        start_time_widget.set_text(activity.start_time.strftime(
+            "%Y-%m-%d %H:%M"))
         time_widget.set_text("%02i:%02i:%02i" % (hours, minutes, seconds)) 
         distance_widget.set_text("%.2f km" % (activity.distance / 1000))
         speed_widget.set_text("%.2f km/hr" % ((activity.distance / 1000) / 
