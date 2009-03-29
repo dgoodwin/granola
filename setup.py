@@ -2,7 +2,7 @@
 #
 #   Granola - GPS Enabled Open Source Workout/Adventure Log
 #
-#   Copyright (C) 2009 Devan Goodwin <dgoodwin@dangerouslyinc.com>
+#   Copyright (C) 2009 Devan Goodwin <dgoodwin@rm-rf.ca>
 #
 #
 #   This program is free software; you can redistribute it and/or modify
@@ -132,7 +132,7 @@ setup(
     description = "",
     long_description = "",
     author = "Devan Goodwin",
-    author_email = 'dgoodwin@dangerouslyinc.com',
+    author_email = 'dgoodwin@rm-rf.ca',
     url = "http://rm-rf.ca/granola/",
     # Note released yet
     #download_url = "",
@@ -145,13 +145,14 @@ setup(
     scripts = ['bin/granola'],
     include_package_data = True,
 
-    install_requires = [
-        'pysqlite2',
-        'sqlite3',
-        'sqlalchemy',
-        'dateutil',
-        'garmin-sync',
-    ],
+# Commenting these out, doesn't seem to work out of the box, will stick to
+# package deps for now.
+#    install_requires = [
+#        'pysqlite2',
+#        'sqlite3',
+#        'sqlalchemy',
+#        'dateutil',
+#    ],
 
     classifiers = [
         'License :: OSI Approved :: GNU General Public License (GPL)',
