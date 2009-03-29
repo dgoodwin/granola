@@ -34,6 +34,7 @@ from granola import write_config
 
 RUNNING = "running"
 BIKING = "biking"
+FILTER_ALL = "all"
 
 def find_file_on_path(pathname):
     """
@@ -60,15 +61,22 @@ class GranolaMainWindow(object):
     def __init__(self, config):
         log.debug("Starting GTK UI.")
         self.config = config
+        self.session = Session()
 
         glade_file = 'granola/glade/mainwindow.glade'
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         main_window = self.glade_xml.get_widget('main_window')
+        
+        # Filter main list of activities based on this, None = show all.
+        # Storing just the string name here.
+        self.filter_sport = None
 
         # References to various widgets used throughout the class:
         self.activity_popup_menu = self.glade_xml.get_widget(
                 'activity_popup_menu')
         self.activity_tv = self.glade_xml.get_widget('activity_treeview')
+        self.sport_filter_combobox = self.glade_xml.get_widget(
+                'sport_filter_combobox')
         
         signals = {
             'on_quit_menu_item_activate': self.shutdown,
@@ -78,12 +86,13 @@ class GranolaMainWindow(object):
                 self.activity_tv_mouse_button_cb,
             'on_activity_popup_delete_activate': 
                 self.activity_delete_cb,
+            'on_sport_filter_combobox_changed':
+                self.filter_sport_cb,
         }
         self.glade_xml.signal_autoconnect(signals)
 
         self.init_ui()
 
-        self.session = Session()
         self.running = self.session.query(Sport).filter(
                 Sport.name == RUNNING).one()
         self.biking = self.session.query(Sport).filter(
@@ -170,6 +179,21 @@ class GranolaMainWindow(object):
         avg_hr_column.set_attributes(cell, text=4)
         max_hr_column.set_attributes(cell, text=5)
 
+        # Populate sport filter combobox with the sports in the database:
+        sports_liststore = gtk.ListStore(str)
+        self.sport_filter_combobox.set_model(sports_liststore)
+        cell = gtk.CellRendererText()
+        self.sport_filter_combobox.pack_start(cell, True)
+        self.sport_filter_combobox.add_attribute(cell, 'text', 0)  
+
+        self.sport_filter_combobox.append_text("all")
+        q = self.session.query(Sport).order_by(Sport.name)
+        for sport in q.all():
+            self.sport_filter_combobox.append_text(sport.name)
+        # Activate the first item for All:
+        iter = sports_liststore.get_iter_first()
+        self.sport_filter_combobox.set_active_iter(iter)
+
     def open_prefs_dialog(self, widget):
         prefs_dialog = PreferencesDialog(self.config)
 
@@ -194,6 +218,8 @@ class GranolaMainWindow(object):
                 #float, # avg heart rate
         )
         q = self.session.query(Activity).order_by(Activity.start_time.desc())
+        if self.filter_sport is not None:
+            q = q.filter(Activity.sport == self.filter_sport)
         #q = self.session.query(Activity).filter(Activity.sport == 
         #        sport).order_by(Activity.start_time.desc())
         for run in q.all():
@@ -316,6 +342,20 @@ class GranolaMainWindow(object):
 
         # TODO: More expensive than it needs to be, could just delete row from
         # model?
+        self.populate_activities()
+
+    def filter_sport_cb(self, widget):
+        """ 
+        Callback for when user changes the filter on sport.
+        """
+        iter = self.sport_filter_combobox.get_active_iter()
+        filter_name = self.sport_filter_combobox.get_model().get_value(iter, 0)
+        if filter_name == FILTER_ALL: 
+            self.filter_sport = None
+        else:
+            self.filter_sport = self.session.query(Sport).filter(
+                    Sport.name == filter_name).one()
+        
         self.populate_activities()
 
 
