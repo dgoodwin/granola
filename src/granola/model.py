@@ -30,6 +30,11 @@ from sqlalchemy.ext.declarative import declarative_base
 
 SQLITE_DB = "%s/granola.db" % DATA_DIR
 
+SPORTNAME_RUNNING = "running"
+SPORTNAME_BIKING = "biking"
+SPORTNAME_WALKING = "walking"
+SPORTNAME_OTHER = "other"
+
 def connect_to_db():
     """
     Open a connection to our database.
@@ -214,10 +219,10 @@ def initialize_db():
 
     # Populate the schema:
     session.add_all([
-        Sport("running"),
-        Sport("biking"),
-        Sport("hiking"),
-        Sport("other"),
+        Sport(SPORTNAME_RUNNING),
+        Sport(SPORTNAME_BIKING),
+        Sport(SPORTNAME_WALKING),
+        Sport(SPORTNAME_OTHER),
     ])
     session.add_all([
         Constant("schema_version", VERSION),

@@ -25,6 +25,9 @@ from xml.etree.ElementTree import ElementTree
 from granola.model import *
 from granola.log import log
 
+# Assume "running" below this threshold as walking:
+WALK_RUN_THRESHOLD = 6000.0 / 3600.0
+
 def debug_activity(activity):
     """ Log debug info on this activity. """
     log.debug("Activity: %s" % activity.start_time)
@@ -123,7 +126,6 @@ class GarminTcxImporter(Importer):
 
     def _parse_activity(self, session, activity_elem):
         """ Parse an XML activity element. """
-        sport = self._get_activity_sport(session, activity_elem)
 
         # NOTE: Using the ID for a start time here, it appears to be equal
         # to the start time of the first lap but not sure if this is 
@@ -131,21 +133,23 @@ class GarminTcxImporter(Importer):
         start_time_elem = activity_elem.find(self._get_tag("Id"))
         start_time = dateutil.parser.parse(start_time_elem.text)
 
-        activity = Activity(start_time=start_time, sport=sport)
+        activity = Activity(start_time=start_time, sport=None)
         lap_elements = activity_elem.findall(self._get_tag("Lap"))
         for lap_elem in lap_elements:
             new_lap = self._parse_lap(lap_elem)
             activity.laps.append(new_lap)
 
         debug_activity(activity)
+        sport = self._get_activity_sport(session, activity_elem, activity)
+        activity.sport = sport
         session.add(activity)
 
     def _parse_lap(self, lap_elem):
         """ Parse an XML lap element. """
         start_time = dateutil.parser.parse(lap_elem.attrib['StartTime'])
-        duration = lap_elem.find(self._get_tag("TotalTimeSeconds")).text
-        distance = lap_elem.find(self._get_tag("DistanceMeters")).text
-        speed_max = lap_elem.find(self._get_tag("MaximumSpeed")).text
+        duration = float(lap_elem.find(self._get_tag("TotalTimeSeconds")).text)
+        distance = float(lap_elem.find(self._get_tag("DistanceMeters")).text)
+        speed_max = float(lap_elem.find(self._get_tag("MaximumSpeed")).text)
         calories = lap_elem.find(self._get_tag("Calories")).text
 
         heart_rate_max = None
@@ -163,11 +167,20 @@ class GarminTcxImporter(Importer):
                 heart_rate_max=heart_rate_max, heart_rate_avg=heart_rate_avg)
         return lap
 
-    def _get_activity_sport(self, session, activity):
+    def _get_activity_sport(self, session, activity_elem, activity):
         """
         Lookup a Sport object for this activity.
         """
-        xml_sport = activity.attrib['Sport']
+        xml_sport = activity_elem.attrib['Sport']
+
+        # Running slow == walking!
+        if xml_sport.lower() == SPORTNAME_RUNNING:
+            speed = float(activity.distance) / float(activity.duration)
+            print "threshold = %s" % speed
+            print "threshold = %s" % WALK_RUN_THRESHOLD
+            if speed < WALK_RUN_THRESHOLD:
+                xml_sport = SPORTNAME_WALKING
+
         q = session.query(Sport).filter(Sport.name.like(xml_sport))
         # Will error out if no sport is found:
         sport = q.one()
