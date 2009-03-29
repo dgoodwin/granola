@@ -36,6 +36,7 @@ RUNNING = "running"
 BIKING = "biking"
 FILTER_ALL = "all"
 
+
 def find_file_on_path(pathname):
     """
     Scan the Python path and locate a file with the given name.
@@ -53,6 +54,7 @@ def find_file_on_path(pathname):
     raise Exception("Could not find %s on the Python path."
         % pathname)
 
+
 class GranolaMainWindow(object):
     """
     Main Granola GTK UI Window
@@ -66,7 +68,7 @@ class GranolaMainWindow(object):
         glade_file = 'granola/glade/mainwindow.glade'
         self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
         main_window = self.glade_xml.get_widget('main_window')
-        
+
         # Filter main list of activities based on this, None = show all.
         # Storing just the string name here.
         self.filter_sport = None
@@ -77,14 +79,14 @@ class GranolaMainWindow(object):
         self.activity_tv = self.glade_xml.get_widget('activity_treeview')
         self.sport_filter_combobox = self.glade_xml.get_widget(
                 'sport_filter_combobox')
-        
+
         signals = {
             'on_quit_menu_item_activate': self.shutdown,
             'on_main_window_destroy': self.shutdown,
             'on_prefs_menu_item_activate': self.open_prefs_dialog,
-            'on_activity_treeview_button_press_event': 
+            'on_activity_treeview_button_press_event':
                 self.activity_tv_mouse_button_cb,
-            'on_activity_popup_delete_activate': 
+            'on_activity_popup_delete_activate':
                 self.activity_delete_cb,
             'on_sport_filter_combobox_changed':
                 self.filter_sport_cb,
@@ -184,7 +186,7 @@ class GranolaMainWindow(object):
         self.sport_filter_combobox.set_model(sports_liststore)
         cell = gtk.CellRendererText()
         self.sport_filter_combobox.pack_start(cell, True)
-        self.sport_filter_combobox.add_attribute(cell, 'text', 0)  
+        self.sport_filter_combobox.add_attribute(cell, 'text', 0)
 
         self.sport_filter_combobox.append_text("all")
         q = self.session.query(Sport).order_by(Sport.name)
@@ -204,8 +206,8 @@ class GranolaMainWindow(object):
         self.activity_tv.set_model(running_liststore)
 
     def build_activity_liststore(self):
-        """ 
-        Return a ListStore with data for all activities of the given sport. 
+        """
+        Return a ListStore with data for all activities of the given sport.
         """
         list_store = gtk.ListStore(
                 int, # id
@@ -220,7 +222,7 @@ class GranolaMainWindow(object):
         q = self.session.query(Activity).order_by(Activity.start_time.desc())
         if self.filter_sport is not None:
             q = q.filter(Activity.sport == self.filter_sport)
-        #q = self.session.query(Activity).filter(Activity.sport == 
+        #q = self.session.query(Activity).filter(Activity.sport ==
         #        sport).order_by(Activity.start_time.desc())
         for run in q.all():
             duration_seconds = run.duration
@@ -231,9 +233,9 @@ class GranolaMainWindow(object):
             list_store.append([
                 run.id,
                 run.start_time.strftime("%Y-%m-%d"),
-                "N/A", 
+                "N/A",
                 "%.2f" % (run.distance / 1000),
-                "%02i:%02i:%02i" % (hours, minutes, seconds),                
+                "%02i:%02i:%02i" % (hours, minutes, seconds),
                 "%.2f" % ((run.distance / 1000) / (duration_seconds / 3600)),
                 run.sport.name,
             ])
@@ -241,12 +243,13 @@ class GranolaMainWindow(object):
         return list_store
 
     def display_activity(self, activity):
-        """ 
+        """
         Display an activities details. (below the activities list)
         """
         start_time_widget = self.glade_xml.get_widget('activity_date_display')
         time_widget = self.glade_xml.get_widget('activity_time_display')
-        distance_widget = self.glade_xml.get_widget('activity_distance_display')
+        distance_widget = self.glade_xml.get_widget(
+            'activity_distance_display')
         speed_widget = self.glade_xml.get_widget('activity_speed_display')
         pace_widget = self.glade_xml.get_widget('activity_pace_display')
         avg_hr_widget = self.glade_xml.get_widget('activity_hr_display')
@@ -258,9 +261,9 @@ class GranolaMainWindow(object):
 
         start_time_widget.set_text(activity.start_time.strftime(
             "%Y-%m-%d %H:%M"))
-        time_widget.set_text("%02i:%02i:%02i" % (hours, minutes, seconds)) 
+        time_widget.set_text("%02i:%02i:%02i" % (hours, minutes, seconds))
         distance_widget.set_text("%.2f km" % (activity.distance / 1000))
-        speed_widget.set_text("%.2f km/hr" % ((activity.distance / 1000) / 
+        speed_widget.set_text("%.2f km/hr" % ((activity.distance / 1000) /
             (duration_seconds / 3600)))
         pace_widget.set_text("-")
 
@@ -290,7 +293,7 @@ class GranolaMainWindow(object):
             lap_liststore.append([
                 i,
                 "%.2f" % (lap.distance / 1000),
-                "%02i:%02i:%02i" % (hours, minutes, seconds),                
+                "%02i:%02i:%02i" % (hours, minutes, seconds),
                 "%.2f" % ((lap.distance / 1000) / (duration_seconds / 3600)),
                 lap.heart_rate_avg,
                 lap.heart_rate_max,
@@ -323,17 +326,17 @@ class GranolaMainWindow(object):
 
             # Now handle only right clicks:
             if event.button == 3:
-                self.activity_popup_menu.popup(None, None, None, 
+                self.activity_popup_menu.popup(None, None, None,
                         event.button, time)
                 self.activity_tv = treeview
 
     def activity_delete_cb(self, widget):
-        """ 
+        """
         Callback for when user selected delete from the activity popup menu.
         """
         treeselection = self.activity_tv.get_selection()
         (model, iter) = treeselection.get_selected()
-        query = self.session.query(Activity).filter(Activity.id == 
+        query = self.session.query(Activity).filter(Activity.id ==
                 model.get_value(iter, 0))
         delete_me = query.one() # will error if not exactly one row returned
         log.debug("Deleting! %s" % delete_me)
@@ -345,19 +348,18 @@ class GranolaMainWindow(object):
         self.populate_activities()
 
     def filter_sport_cb(self, widget):
-        """ 
+        """
         Callback for when user changes the filter on sport.
         """
         iter = self.sport_filter_combobox.get_active_iter()
         filter_name = self.sport_filter_combobox.get_model().get_value(iter, 0)
-        if filter_name == FILTER_ALL: 
+        if filter_name == FILTER_ALL:
             self.filter_sport = None
         else:
             self.filter_sport = self.session.query(Sport).filter(
                     Sport.name == filter_name).one()
-        
-        self.populate_activities()
 
+        self.populate_activities()
 
 
 class PreferencesDialog(object):
@@ -383,9 +385,9 @@ class PreferencesDialog(object):
         self.preferences_dialog.show_all()
 
     def apply_prefs(self, widget):
-        """ 
-        Callback when apply button is pressed. Write settings to disk and close
-        the window.
+        """
+        Callback when apply button is pressed. Write settings to disk and
+        close the window.
         """
         log.debug("Applying preferences.")
         import_folder = self.import_folder_chooser.get_filename()
@@ -400,4 +402,3 @@ class PreferencesDialog(object):
         """
         log.debug("Cancel button pressed, closing preferences dialog.")
         self.preferences_dialog.destroy()
-

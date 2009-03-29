@@ -35,6 +35,7 @@ SPORTNAME_BIKING = "biking"
 SPORTNAME_WALKING = "walking"
 SPORTNAME_OTHER = "other"
 
+
 def connect_to_db():
     """
     Open a connection to our database.
@@ -49,16 +50,18 @@ def connect_to_db():
 
     return db
 
+
 Base = declarative_base()
-Session = sessionmaker() 
+Session = sessionmaker()
 # Open a globally accessible connection to the database:
 DB = connect_to_db()
 Session.configure(bind=DB)
 
+
 class Sport(Base):
 
     __tablename__ = "sport"
-    
+
     id = Column(Integer, primary_key=True)
     name = Column(String(40))
 
@@ -67,7 +70,6 @@ class Sport(Base):
 
     def __repr__(self):
         return self.name
-
 
 
 class TrackPoint(Base):
@@ -82,7 +84,6 @@ class TrackPoint(Base):
     altitude = Column(Numeric(12, 6))
     distance = Column(Numeric(12, 6))
     heart_rate = Column(Integer)
-
 
 
 class Lap(Base):
@@ -102,7 +103,7 @@ class Lap(Base):
     trackpoints = relation(TrackPoint, cascade="all")
 
     def __init__(self, start_time=None, duration=None, distance=None,
-            speed_max=None, calories=None, heart_rate_max=None, 
+            speed_max=None, calories=None, heart_rate_max=None,
             heart_rate_avg=None):
         self.start_time = start_time
         self.duration = duration
@@ -111,7 +112,6 @@ class Lap(Base):
         self.calories = calories
         self.heart_rate_max = heart_rate_max
         self.heart_rate_avg = heart_rate_avg
-
 
 
 class Activity(Base):
@@ -135,6 +135,7 @@ class Activity(Base):
                 (self.id, self.start_time)
 
     # TODO: All these properties are probably not the best performance wise:
+
     def _get_distance(self):
         distance = None
         for lap in self.laps:
@@ -165,7 +166,6 @@ class Activity(Base):
     heart_rate_avg = property(_get_heart_rate_avg, None)
 
 
-
 class Constant(Base):
     """ Store random string constants in the database. """
 
@@ -179,9 +179,8 @@ class Constant(Base):
         self.value = value
 
 
-
 class Import(Base):
-    """ 
+    """
     Items we've automatically imported. Identified by a type and a string.
 
     TODO: May want to push this to the db if the types expand at all.
@@ -190,7 +189,7 @@ class Import(Base):
     __tablename__ = "import"
 
     id = Column(Integer, primary_key=True)
-    
+
     # Type of the auto-import, 1 = file for now.
     import_type = Column(Integer)
 
@@ -202,10 +201,9 @@ class Import(Base):
         self.identifier = identifier
 
 
-
 def initialize_db():
     """
-    Open the database, presumably for the first time, and populate the schema. 
+    Open the database, presumably for the first time, and populate the schema.
 
     Returns the database engine.
     """
@@ -228,4 +226,3 @@ def initialize_db():
         Constant("schema_version", VERSION),
     ])
     session.commit()
-

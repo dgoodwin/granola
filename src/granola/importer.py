@@ -28,6 +28,7 @@ from granola.log import log
 # Assume "running" below this threshold as walking:
 WALK_RUN_THRESHOLD = 6000.0 / 3600.0
 
+
 def debug_activity(activity):
     """ Log debug info on this activity. """
     log.debug("Activity: %s" % activity.start_time)
@@ -43,6 +44,7 @@ def debug_activity(activity):
         log.debug("      Avg heart rate: %s bpm" % lap.heart_rate_avg)
         i += 1
 
+
 class Importer(object):
     """ Parent Importer class. """
 
@@ -51,17 +53,16 @@ class Importer(object):
         pass
 
     def import_file(self, filename):
-        """ 
-        Import the data in the given file. 
+        """
+        Import the data in the given file.
         """
         pass
 
 
-
 class GarminTcxImporter(Importer):
-    """ 
-    Importer for Garmin TCX XML Documents. 
-    
+    """
+    Importer for Garmin TCX XML Documents.
+
     See: http://developer.garmin.com/schemas/tcx/v2/
     """
     # TODO: There must be a way to get this off the ElementTree object:
@@ -71,7 +72,7 @@ class GarminTcxImporter(Importer):
         """ Scan a directory for new data files to import. """
         if not os.path.exists(directory):
             raise Exception("No such directory: %s" % directory)
-        log.debug("Scanning %s for new data." % directory) 
+        log.debug("Scanning %s for new data." % directory)
 
         session = Session()
 
@@ -87,8 +88,8 @@ class GarminTcxImporter(Importer):
 #                        session.rollback()
 
     def import_file(self, session, filename):
-        """ 
-        Import the data in the given file. 
+        """
+        Import the data in the given file.
         """
         if not os.path.exists(filename):
             raise Exception("No such file: %s" % filename)
@@ -96,11 +97,11 @@ class GarminTcxImporter(Importer):
         base_filename = os.path.basename(filename)
 
         # Check if we've imported this file before. Assume
-        # if an activity exists with a start time equal to the 
+        # if an activity exists with a start time equal to the
         # file name, that way we dont waste time parsing
         # the XML.
         start_time = dateutil.parser.parse(base_filename[0:-4])
-        if session.query(Import).filter(Import.identifier == 
+        if session.query(Import).filter(Import.identifier ==
                 base_filename).first():
             log.info("Skipping: %s" % base_filename)
             return
@@ -111,13 +112,14 @@ class GarminTcxImporter(Importer):
         tree.parse(filename)
         root = tree.getroot()
         activities_elem = root.find(self._get_tag("Activities"))
-        if activities_elem is None: 
+        if activities_elem is None:
             raise Exception("Unable to parse %s: No activities found." %
                     filename)
-        for activity_elem in activities_elem.findall(self._get_tag("Activity")):
+        for activity_elem in activities_elem.findall(
+            self._get_tag("Activity")):
             self._parse_activity(session, activity_elem)
 
-        # Store that we've imported this file in the past, allowing us to 
+        # Store that we've imported this file in the past, allowing us to
         # delete in the UI without re-importing it if the file is still laying
         # around in the directory. Manual file import should be made available
         # at some point to correct any delete mistakes.
@@ -128,7 +130,7 @@ class GarminTcxImporter(Importer):
         """ Parse an XML activity element. """
 
         # NOTE: Using the ID for a start time here, it appears to be equal
-        # to the start time of the first lap but not sure if this is 
+        # to the start time of the first lap but not sure if this is
         # guaranteed in the XML definition:
         start_time_elem = activity_elem.find(self._get_tag("Id"))
         start_time = dateutil.parser.parse(start_time_elem.text)
@@ -163,7 +165,7 @@ class GarminTcxImporter(Importer):
             heart_rate_avg = avg_hr_elem.find(self._get_tag("Value")).text
 
         lap = Lap(start_time=start_time, duration=duration, distance=distance,
-                speed_max=speed_max, calories=calories, 
+                speed_max=speed_max, calories=calories,
                 heart_rate_max=heart_rate_max, heart_rate_avg=heart_rate_avg)
         return lap
 
@@ -192,4 +194,3 @@ class GarminTcxImporter(Importer):
         i.e. {XMLNS}Tag
         """
         return "{%s}%s" % (self.xmlns, tag)
-

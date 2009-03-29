@@ -57,6 +57,7 @@ def initialize_granola():
 
     initialize_db()
 
+
 def read_or_create_config():
     """
     Read configuration from granolarc, or create it with default
@@ -69,7 +70,7 @@ def read_or_create_config():
 
     # Check for all required settings, if missing add a default:
     default_import_settings = {
-            'import_folder': os.path.join(os.path.expanduser("~/"), 
+            'import_folder': os.path.join(os.path.expanduser("~/"),
                 "exports"),
     }
     if not config.has_section("import"):
@@ -81,15 +82,14 @@ def read_or_create_config():
                     (setting, default_value))
             config.set("import", setting, default_value)
 
-    # Write the config back out now that we've added a default for anything 
+    # Write the config back out now that we've added a default for anything
     # that was missing:
     write_config(config)
     return config
+
 
 def write_config(config):
     """ Write granolarc config to disk. """
     f = open(GRANOLARC, 'w')
     config.write(f)
     f.close()
-
-
