@@ -344,7 +344,7 @@ class GranolaMainWindow(object):
         activity = self.session.query(Activity).filter(Activity.id ==
                 model.get_value(iter, 0)).one()
 
-        activity_details_window = WebBrowser()
+        activity_details_window = WebBrowser(activity)
         activity_details_window.show_all()
 
     def activity_delete_cb(self, widget):

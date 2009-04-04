@@ -30,6 +30,7 @@ import webkit
 from gettext import gettext as _
 
 from granola.log import log
+from granola.htmlgenerator import HtmlGenerator
 
 class BrowserPage(webkit.WebView):
 
@@ -58,8 +59,9 @@ class WebStatusBar(gtk.Statusbar):
 
 
 class WebBrowser(gtk.Window):
-    def __init__(self):
+    def __init__(self, activity):
         gtk.Window.__init__(self)
+        self.activity = activity
 
         log.debug("Opening browser window.")
 
@@ -93,7 +95,10 @@ class WebBrowser(gtk.Window):
         self.set_default_size(800, 600)
 
         self.connect('destroy', self.close_window)
-        self._browser.open("file:///home/dev/exports/kml.html")
+        generator = HtmlGenerator(self.activity)
+        html = generator.generate_html()
+        self._browser.load_string(html, "text/html", "iso-8859-15", "about:")
+        #self._browser.open("file:///home/dev/exports/kml.html")
 
         self.show_all()
 
