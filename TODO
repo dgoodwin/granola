@@ -2,6 +2,8 @@
 
 - Display stats tab.
 - Display in Google Maps.
+- Generate KML files from what's in our db or from orig files?
+  - http://code.google.com/apis/kml/documentation/kmlreference.html
 
 === Medium Priority === 
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sun Mar 29 12:51:20 2009 -->
+<!--Generated with glade3 3.4.5 on Sun Mar 29 17:58:16 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="main_window">
     <property name="width_request">800</property>
@@ -163,6 +163,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <signal name="button_press_event" handler="on_activity_treeview_button_press_event"/>
+                        <signal name="row_activated" handler="on_activity_treeview_row_activated"/>
                       </widget>
                     </child>
                   </widget>

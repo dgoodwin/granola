@@ -30,6 +30,7 @@ import sys
 
 from granola.log import log
 from granola.model import *
+from granola.ui.gtk.browser import *
 from granola import write_config
 
 RUNNING = "running"
@@ -85,9 +86,11 @@ class GranolaMainWindow(object):
             'on_main_window_destroy': self.shutdown,
             'on_prefs_menu_item_activate': self.open_prefs_dialog,
             'on_activity_treeview_button_press_event':
-                self.activity_tv_mouse_button_cb,
+                self.activity_tv_click_cb,
             'on_activity_popup_delete_activate':
                 self.activity_delete_cb,
+            'on_activity_treeview_row_activated':
+                self.activity_tv_doubleclick_cb,
             'on_sport_filter_combobox_changed':
                 self.filter_sport_cb,
         }
@@ -302,7 +305,7 @@ class GranolaMainWindow(object):
 
         self.lap_tv.set_model(lap_liststore)
 
-    def activity_tv_mouse_button_cb(self, treeview, event):
+    def activity_tv_click_cb(self, treeview, event):
 
         # Handle both left and right mouse button clicks:
         if event.button == 3 or event.button == 1:
@@ -329,6 +332,20 @@ class GranolaMainWindow(object):
                 self.activity_popup_menu.popup(None, None, None,
                         event.button, time)
                 self.activity_tv = treeview
+
+#    def activity_show_map_cb(self, widget):
+    def activity_tv_doubleclick_cb(self, treeview, path, view_column):
+        """
+        Open details window to display map for this activity.
+        """
+        selection = self.activity_tv.get_selection()
+        (model, iter) = selection.get_selected()
+        # Lookup the activity object rather than rely on model columns:
+        activity = self.session.query(Activity).filter(Activity.id ==
+                model.get_value(iter, 0)).one()
+
+        activity_details_window = WebBrowser()
+        activity_details_window.show_all()
 
     def activity_delete_cb(self, widget):
         """
@@ -402,3 +419,4 @@ class PreferencesDialog(object):
         """
         log.debug("Cancel button pressed, closing preferences dialog.")
         self.preferences_dialog.destroy()
+

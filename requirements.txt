@@ -6,3 +6,4 @@ python-sqlalchemy
 python-dateutil
 python-setuptools
 garmin-sync (kinda)
+pywebkitgtk
