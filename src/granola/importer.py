@@ -167,7 +167,54 @@ class GarminTcxImporter(Importer):
         lap = Lap(start_time=start_time, duration=duration, distance=distance,
                 speed_max=speed_max, calories=calories,
                 heart_rate_max=heart_rate_max, heart_rate_avg=heart_rate_avg)
+
+        track_element = lap_elem.find(self._get_tag("Track"))
+        if track_element is not None:
+            trackpoint_elements = track_element.findall(
+                    self._get_tag("Trackpoint"))
+            for trackpoint_element in trackpoint_elements:
+                new_trackpoint = self._parse_trackpoint(trackpoint_element)
+                lap.trackpoints.append(new_trackpoint)
+
         return lap
+
+    def _parse_trackpoint(self, trackpoint_elem):
+        time = dateutil.parser.parse(trackpoint_elem.find(
+            self._get_tag("Time")).text)
+
+        altitude = None
+        altitude_elem = trackpoint_elem.find(
+            self._get_tag("AltitudeMeters"))
+        if altitude_elem is not None:
+            altitude = float(altitude_elem.text)
+
+        distance = None
+        distance_elem = trackpoint_elem.find(
+            self._get_tag("DistanceMeters"))
+        if distance_elem is not None:
+            distance = float(distance_elem.text)
+
+
+        heart_rate = None
+        heart_rate_elem = trackpoint_elem.find(
+            self._get_tag("HeartRateBpm"))
+        if heart_rate_elem is not None:
+            heart_rate_value_elem = heart_rate_elem.find(
+                    self._get_tag("Value"))
+            heart_rate = int(heart_rate_value_elem.text)
+
+        latitude = None
+        longitude = None
+        position_elem = trackpoint_elem.find(self._get_tag("Position"))
+        if position_elem is not None:
+            latitude = float(position_elem.find(
+                self._get_tag("LatitudeDegrees")).text)
+            longitude = float(position_elem.find(
+                self._get_tag("LongitudeDegrees")).text)
+        
+        tp = TrackPoint(time=time, latitude=latitude, longitude=longitude, 
+                altitude=altitude, distance=distance, heart_rate=heart_rate)
+        return tp
 
     def _get_activity_sport(self, session, activity_elem, activity):
         """
@@ -178,8 +225,6 @@ class GarminTcxImporter(Importer):
         # Running slow == walking!
         if xml_sport.lower() == SPORTNAME_RUNNING:
             speed = float(activity.distance) / float(activity.duration)
-            print "threshold = %s" % speed
-            print "threshold = %s" % WALK_RUN_THRESHOLD
             if speed < WALK_RUN_THRESHOLD:
                 xml_sport = SPORTNAME_WALKING
 

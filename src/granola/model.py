@@ -85,6 +85,15 @@ class TrackPoint(Base):
     distance = Column(Numeric(12, 6))
     heart_rate = Column(Integer)
 
+    def __init__(self, time=None, latitude=None, longitude=None, 
+            altitude=None, distance=None, heart_rate=None):
+        self.time = time
+        self.latitude = latitude
+        self.longitude = longitude
+        self.altitude = altitude
+        self.distance = distance
+        self.heart_rate = heart_rate
+
 
 class Lap(Base):
 
@@ -112,6 +121,9 @@ class Lap(Base):
         self.calories = calories
         self.heart_rate_max = heart_rate_max
         self.heart_rate_avg = heart_rate_avg
+
+    def __repr__(self):
+        return "Lap - %s" % self.start_time
 
 
 class Activity(Base):
