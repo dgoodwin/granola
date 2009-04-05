@@ -43,7 +43,7 @@ HTML_HEADER = """
 """
 
 HTML_FOOTER = """
-                        ], "#0000ff", 5);
+                        ], "#0000ff", 3);
                 map.addControl(new GLargeMapControl());
                 map.addControl(new GLargeMapControl());
                 map.addOverlay(polyline);
@@ -53,7 +53,7 @@ HTML_FOOTER = """
   </head>
 
   <body onload="initialize()">
-      <div id="map_canvas" style="width: 640px; height: 480px; float:left; border: 1px solid black;"></div>
+      <div id="map_canvas" style="width: 750px; height: 550px; float:center; border: 1px solid black;"></div>
   </div>
   <br clear="all"/>
   <br/>
