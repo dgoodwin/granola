@@ -168,15 +168,21 @@ class GarminTcxImporter(Importer):
                 speed_max=speed_max, calories=calories,
                 heart_rate_max=heart_rate_max, heart_rate_avg=heart_rate_avg)
 
-        track_element = lap_elem.find(self._get_tag("Track"))
-        if track_element is not None:
-            trackpoint_elements = track_element.findall(
-                    self._get_tag("Trackpoint"))
-            for trackpoint_element in trackpoint_elements:
-                new_trackpoint = self._parse_trackpoint(trackpoint_element)
-                lap.trackpoints.append(new_trackpoint)
+        track_elements = lap_elem.findall(self._get_tag("Track"))
+        for track_element in track_elements:
+            new_track = self._parse_track(track_element)
+            lap.tracks.append(new_track)
 
         return lap
+
+    def _parse_track(self, track_elem):
+        trackpoint_elements = track_elem.findall(
+                self._get_tag("Trackpoint"))
+        track = Track()
+        for trackpoint_element in trackpoint_elements:
+            new_trackpoint = self._parse_trackpoint(trackpoint_element)
+            track.trackpoints.append(new_trackpoint)
+        return track
 
     def _parse_trackpoint(self, trackpoint_elem):
         time = dateutil.parser.parse(trackpoint_elem.find(

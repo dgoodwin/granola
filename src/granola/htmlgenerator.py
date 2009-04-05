@@ -76,23 +76,35 @@ class HtmlGenerator(object):
         f = open(filepath, "w")
 
         if len(self.activity.laps) == 0:
-            return "<html><body>No trackpoints</body></html>"
-        elif len(self.activity.laps[0].trackpoints) == 0:
-            return "<html><body>No trackpoints</body></html>"
+            f.write("<html><body>No trackpoints</body></html>")
+            f.close()
+            return filepath
+        elif len(self.activity.laps[0].tracks) == 0:
+            f.write("<html><body>No trackpoints</body></html>")
+            f.close()
+            return filepath
+        elif len(self.activity.laps[0].tracks[0].trackpoints) == 0:
+            f.write("<html><body>No trackpoints</body></html>")
+            f.close()
+            return filepath
 
         title = "Granola Activity Map: %s (%s)" % (self.activity.start_time,
                 self.activity.sport.name)
-        center_coords = self.activity.laps[0].trackpoints[0]
+        # TODO: Find a better way to center the map than starting point.
+        center_coords = self.activity.laps[0].tracks[0].trackpoints[0]
 
         f.write(HTML_HEADER % (title, center_coords.latitude, 
             center_coords.longitude))
 
         for lap in self.activity.laps:
-            for trackpoint in lap.trackpoints:
-                if trackpoint.latitude is None:
-                    continue
-                f.write("new GLatLng(%s, %s)," % (trackpoint.latitude, 
-                    trackpoint.longitude))
+            for track in lap.tracks:
+                for trackpoint in track.trackpoints:
+                    if trackpoint.latitude is None:
+                        # TODO: Empty data in a trackpoint indicates a pause, 
+                        # could display this easily.
+                        continue
+                    f.write("new GLatLng(%s, %s)," % (trackpoint.latitude, 
+                        trackpoint.longitude))
 
         f.write(HTML_FOOTER)
         f.close()

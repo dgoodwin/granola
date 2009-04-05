@@ -77,7 +77,7 @@ class TrackPoint(Base):
     __tablename__ = "trackpoint"
 
     id = Column(Integer, primary_key=True)
-    lap_id = Column(Integer, ForeignKey('lap.id'))
+    track_id = Column(Integer, ForeignKey('track.id'))
     time = Column(DateTime(timezone=True))
     latitude = Column(Numeric(9, 6))
     longitude = Column(Numeric(9, 6))
@@ -94,6 +94,27 @@ class TrackPoint(Base):
         self.distance = distance
         self.heart_rate = heart_rate
 
+    def __repr__(self):
+        return "TrackPoint<time=%s, lat=%s, lon=%s, alt=%s, hr=%s, dist=%s>" % (
+                self.time, self.latitude, self.longitude, self.altitude, 
+                self.distance, self.heart_rate)
+
+
+class Track(Base):
+    """
+    Used to represent pauses in the track. A lap will normally have one track, 
+    plus one more for each pause during that lap. The last trackpoint in the 
+    previous track will always contain just a time. (no latitude/longitude 
+    data) allowing us to see how long the pause was for.
+    """
+
+    __tablename__ = "track"
+
+    id = Column(Integer, primary_key=True)
+    lap_id = Column(Integer, ForeignKey('lap.id'))
+
+    trackpoints = relation(TrackPoint, cascade="all")
+
 
 class Lap(Base):
 
@@ -109,7 +130,7 @@ class Lap(Base):
     heart_rate_max = Column(Integer) # beats per minute
     heart_rate_avg = Column(Integer) # beats per minute
 
-    trackpoints = relation(TrackPoint, cascade="all")
+    tracks = relation(Track, cascade="all")
 
     def __init__(self, start_time=None, duration=None, distance=None,
             speed_max=None, calories=None, heart_rate_max=None,
