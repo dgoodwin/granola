@@ -22,16 +22,14 @@
 
 from granola.log import log
 
-HTML_START="""
+HTML_HEADER = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" 
     xmlns:v="urn:schemas-microsoft-com:vml">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-"""
-
-HTML_2="""
+        <title>%s</title>
         <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAzr2EBOXUKnm_jVnk0OJI7xSosDVG8KKPE1-m51RBrvYughuyMxQ-i1QfUnH94QxWIa6N4U6MouMmBA"
             type="text/javascript"></script>
         <script type="text/javascript"> 
@@ -39,20 +37,19 @@ HTML_2="""
         function initialize() {
             if (GBrowserIsCompatible()) {
                 var map = new GMap2(document.getElementById("map_canvas"));
+                map.setCenter(new GLatLng(%s, %s), 15);
+                map.setUIToDefault();
+                var polyline = new GPolyline([
 """
 
-HTML_3="""
-var polyline = new GPolyline([
-"""
-
-HTML_END="""
+HTML_FOOTER = """
                         ], "#0000ff", 5);
                 map.addControl(new GLargeMapControl());
                 map.addControl(new GLargeMapControl());
                 map.addOverlay(polyline);
             }
         } 
-</script>
+        </script>
   </head>
 
   <body onload="initialize()">
@@ -83,17 +80,12 @@ class HtmlGenerator(object):
         elif len(self.activity.laps[0].trackpoints) == 0:
             return "<html><body>No trackpoints</body></html>"
 
-        html_title = "<title>Granola Activity: %s</title>\n" % self.activity.id
-
+        title = "Granola Activity Map: %s (%s)" % (self.activity.start_time,
+                self.activity.sport.name)
         center_coords = self.activity.laps[0].trackpoints[0]
-        html_center_coords = "map.setCenter(new GLatLng(%s, %s), 16);" \
-                % (center_coords.latitude, center_coords.longitude)
 
-        f.write(HTML_START)
-        f.write(html_title)
-        f.write(HTML_2)
-        f.write(html_center_coords)
-        f.write(HTML_3)
+        f.write(HTML_HEADER % (title, center_coords.latitude, 
+            center_coords.longitude))
 
         for lap in self.activity.laps:
             for trackpoint in lap.trackpoints:
@@ -102,7 +94,7 @@ class HtmlGenerator(object):
                 f.write("new GLatLng(%s, %s)," % (trackpoint.latitude, 
                     trackpoint.longitude))
 
-        f.write(HTML_END)
+        f.write(HTML_FOOTER)
         f.close()
         return filepath
 
