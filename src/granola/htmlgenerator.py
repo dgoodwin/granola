@@ -37,7 +37,9 @@ HTML_HEADER = """
         function initialize() {
             if (GBrowserIsCompatible()) {
                 var map = new GMap2(document.getElementById("map_canvas"));
+                // Initialize map, should be done before everything else.
                 map.setCenter(new GLatLng(%s, %s), 15);
+                map.setMapType(G_SATELLITE_MAP);
                 map.setUIToDefault();
                 var polyline = new GPolyline([
 """

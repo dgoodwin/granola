@@ -100,7 +100,6 @@ class GarminTcxImporter(Importer):
         # if an activity exists with a start time equal to the
         # file name, that way we dont waste time parsing
         # the XML.
-        start_time = dateutil.parser.parse(base_filename[0:-4])
         if session.query(Import).filter(Import.identifier ==
                 base_filename).first():
             log.info("Skipping: %s" % base_filename)
