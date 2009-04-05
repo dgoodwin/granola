@@ -39,8 +39,6 @@ HTML_2="""
         function initialize() {
             if (GBrowserIsCompatible()) {
                 var map = new GMap2(document.getElementById("map_canvas"));
-                map.addControl(new GLargeMapControl());
-                map.addControl(new GLargeMapControl());
 """
 
 HTML_3="""
@@ -48,7 +46,9 @@ var polyline = new GPolyline([
 """
 
 HTML_END="""
-                        ], "#ff0000", 10);
+                        ], "#0000ff", 5);
+                map.addControl(new GLargeMapControl());
+                map.addControl(new GLargeMapControl());
                 map.addOverlay(polyline);
             }
         } 
@@ -74,6 +74,10 @@ class HtmlGenerator(object):
         Generate HTML to render a Google Map for the configured activity. 
         """
 
+        filepath = "/tmp/granola-%s-%s-%s.html" % (self.activity.id,
+                self.activity.sport.name, self.activity.start_time)
+        f = open(filepath, "w")
+
         if len(self.activity.laps) == 0:
             return "<html><body>No trackpoints</body></html>"
         elif len(self.activity.laps[0].trackpoints) == 0:
@@ -82,32 +86,23 @@ class HtmlGenerator(object):
         html_title = "<title>Granola Activity: %s</title>\n" % self.activity.id
 
         center_coords = self.activity.laps[0].trackpoints[0]
-        html_center_coords = "map.setCenter(new GLatLng(%s, %s), 13);" \
+        html_center_coords = "map.setCenter(new GLatLng(%s, %s), 16);" \
                 % (center_coords.latitude, center_coords.longitude)
 
-        html_coords = ""
+        f.write(HTML_START)
+        f.write(html_title)
+        f.write(HTML_2)
+        f.write(html_center_coords)
+        f.write(HTML_3)
+
         for lap in self.activity.laps:
             for trackpoint in lap.trackpoints:
                 if trackpoint.latitude is None:
                     continue
-                html_coords += """new GLatLng(%s, %s),""" % (trackpoint.latitude, trackpoint.longitude)
+                f.write("new GLatLng(%s, %s)," % (trackpoint.latitude, 
+                    trackpoint.longitude))
 
-
-        html = "%s%s%s%s%s%s%s" % (
-                HTML_START, 
-                html_title,
-                HTML_2,
-                html_center_coords,
-                HTML_3,
-                html_coords,
-                HTML_END
-        )
-        filepath = "/tmp/granola-%s-%s-%s.html" % (self.activity.id,
-                self.activity.sport.name, self.activity.start_time)
-        f = open(filepath, "w")
-        f.write(html)
+        f.write(HTML_END)
         f.close()
         return filepath
-
-
 

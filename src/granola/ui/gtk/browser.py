@@ -100,6 +100,7 @@ class WebBrowser(gtk.Window):
         log.debug("Wrote activity html to: %s" % filepath)
         #self._browser.load_string(html, "text/html", "iso-8859-15", "about:")
         self._browser.open("file://%s" % filepath)
+        # TODO: delete the temporary file when window is closed
 
         self.show_all()
 
