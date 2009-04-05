@@ -26,6 +26,7 @@ Based on the demo code included with PyWebkit.
 
 import gtk
 import webkit
+import commands
 
 from gettext import gettext as _
 
@@ -96,15 +97,16 @@ class WebBrowser(gtk.Window):
 
         self.connect('destroy', self.close_window)
         generator = HtmlGenerator(self.activity)
-        filepath = generator.generate_html()
-        log.debug("Wrote activity html to: %s" % filepath)
+        self.temp_file = generator.generate_html()
+        log.debug("Wrote activity HTML to: %s" % self.temp_file)
         #self._browser.load_string(html, "text/html", "iso-8859-15", "about:")
-        self._browser.open("file://%s" % filepath)
-        # TODO: delete the temporary file when window is closed
+        self._browser.open("file://%s" % self.temp_file)
 
         self.show_all()
 
     def close_window(self, widget):
+        log.info("Removing: %s" % self.temp_file)
+        commands.getstatusoutput("rm %s" % self.temp_file)
         self.destroy()
 
     def _set_title(self, title):

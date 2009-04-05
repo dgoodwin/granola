@@ -71,8 +71,8 @@ class HtmlGenerator(object):
         Generate HTML to render a Google Map for the configured activity. 
         """
 
-        filepath = "/tmp/granola-%s-%s-%s.html" % (self.activity.id,
-                self.activity.sport.name, self.activity.start_time)
+        filepath = "/tmp/granola-%s-%s.html" % (self.activity.id,
+                self.activity.sport.name)
         f = open(filepath, "w")
 
         if len(self.activity.laps) == 0:
