@@ -96,9 +96,10 @@ class WebBrowser(gtk.Window):
 
         self.connect('destroy', self.close_window)
         generator = HtmlGenerator(self.activity)
-        html = generator.generate_html()
-        self._browser.load_string(html, "text/html", "iso-8859-15", "about:")
-        #self._browser.open("file:///home/dev/exports/kml.html")
+        filepath = generator.generate_html()
+        log.debug("Wrote activity html to: %s" % filepath)
+        #self._browser.load_string(html, "text/html", "iso-8859-15", "about:")
+        self._browser.open("file://%s" % filepath)
 
         self.show_all()
 
