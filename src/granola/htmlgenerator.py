@@ -90,14 +90,17 @@ class HtmlGenerator(object):
             f.close()
             return filepath
 
+        (centerLat, centerLon) = self._calculate_center_coords(self.activity)
+
         title = "Granola Activity Map: %s (%s)" % (self.activity.start_time,
                 self.activity.sport.name)
         # TODO: Find a better way to center the map than starting point.
         center_coords = self.activity.laps[0].tracks[0].trackpoints[0]
 
-        f.write(HTML_HEADER % (title, center_coords.latitude, 
-            center_coords.longitude))
+        f.write(HTML_HEADER % (title, centerLat, centerLon))
 
+        # TODO: iterating trackpoints a second time but probably faster
+        # than doing the string concatenation we'd have to do otherwise.
         for lap in self.activity.laps:
             for track in lap.tracks:
                 for trackpoint in track.trackpoints:
@@ -111,4 +114,33 @@ class HtmlGenerator(object):
         f.write(HTML_FOOTER)
         f.close()
         return filepath
+
+    def _calculate_center_coords(self, activity):
+        """ Calculate the latitude and longitude to center on. """
+
+        maxLat = None
+        minLat = None
+        maxLon = None
+        minLon = None
+        for lap in self.activity.laps:
+            for track in lap.tracks:
+                for trackpoint in track.trackpoints:
+                    if trackpoint.latitude is None:
+                        continue
+                    if maxLat is None:
+                        # Assume all must be None:
+                        maxLat = trackpoint.latitude
+                        minLat = trackpoint.latitude
+                        maxLon = trackpoint.longitude
+                        minLon = trackpoint.longitude
+                    else:
+                        maxLat = max(maxLat, trackpoint.latitude)
+                        minLat = min(minLat, trackpoint.latitude)
+                        maxLon = max(maxLon, trackpoint.longitude)
+                        minLon = min(minLon, trackpoint.longitude)
+
+        centerLat = minLat + (maxLat - minLat) / 2
+        centerLon = minLon + (maxLon - minLon) / 2
+
+        return (centerLat, centerLon)
 
