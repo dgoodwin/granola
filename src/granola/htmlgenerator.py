@@ -20,6 +20,9 @@
 
 """ Generate Temporary HTML Files To Render Google Maps """
 
+import math
+
+from decimal import Decimal
 from granola.log import log
 
 HTML_HEADER = """
@@ -38,14 +41,42 @@ HTML_HEADER = """
             if (GBrowserIsCompatible()) {
                 var map = new GMap2(document.getElementById("map_canvas"));
                 // Initialize map, should be done before everything else.
-                map.setCenter(new GLatLng(%s, %s), 15);
+                map.setCenter(new GLatLng(%s, %s), 14);
                 map.setMapType(G_SATELLITE_MAP);
                 map.setUIToDefault();
                 var polyline = new GPolyline([
 """
 
+EARTHS_RADIUS = 6372.797
+
+def distance_between_coords(lat1, lon1, lat2, lon2):
+    """ 
+    Returns the distance between two pairs of latitude/longitude coordinates.
+
+    Based on http://snipplr.com/view/2531/, sorry for the terrible variable
+    names.
+    """
+    pi180 = Decimal(str(math.pi / 180))
+    temp_lat1 = lat1
+    temp_lon1 = lon1
+    temp_lat2 = lat2
+    temp_lon2 = lon1
+
+    temp_lat1 *= pi180
+    temp_lon1 *= pi180
+    temp_lat2 *= pi180
+    temp_lon2 *= pi180
+
+    dlat = temp_lat2 - temp_lat1
+    dlon = temp_lon2 - temp_lon1
+    a = math.sin(dlat / 2) * math.sin(dlat / 2) + math.cos(temp_lat1) * \
+            math.cos(temp_lat2) * math.sin(dlon / 2) * math.sin(dlon / 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    km = EARTHS_RADIUS * c
+    return km
+
+
 HTML_FOOTER = """
-                        ], "#0000ff", 3);
                 map.addControl(new GLargeMapControl());
                 map.addControl(new GLargeMapControl());
                 map.addOverlay(polyline);
@@ -90,7 +121,8 @@ class HtmlGenerator(object):
             f.close()
             return filepath
 
-        (centerLat, centerLon) = self._calculate_center_coords(self.activity)
+        (maxLat, maxLon, minLat, minLon, centerLat, centerLon) = \
+                self._calculate_center_coords(self.activity)
 
         title = "Granola Activity Map: %s (%s)" % (self.activity.start_time,
                 self.activity.sport.name)
@@ -110,6 +142,11 @@ class HtmlGenerator(object):
                         continue
                     f.write("new GLatLng(%s, %s)," % (trackpoint.latitude, 
                         trackpoint.longitude))
+        f.write("""                        ], "#0000ff", 3);""")
+        f.write("""map.addOverlay(new GMarker(new GLatLng(%s, %s)));""" %
+                (maxLat, maxLon))
+        f.write("""map.addOverlay(new GMarker(new GLatLng(%s, %s)));""" %
+                (minLat, minLon))
 
         f.write(HTML_FOOTER)
         f.close()
@@ -139,8 +176,11 @@ class HtmlGenerator(object):
                         maxLon = max(maxLon, trackpoint.longitude)
                         minLon = min(minLon, trackpoint.longitude)
 
+        span_km = distance_between_coords(maxLat, maxLon, minLat, minLon)
+        log.debug("Distance between coordinates: %s" % span_km)
+
         centerLat = minLat + (maxLat - minLat) / 2
         centerLon = minLon + (maxLon - minLon) / 2
 
-        return (centerLat, centerLon)
+        return (maxLat, maxLon, minLat, minLon, centerLat, centerLon)
 
