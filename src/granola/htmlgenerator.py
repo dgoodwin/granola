@@ -105,7 +105,7 @@ def get_zoom_level(distance):
         return 16
     elif distance < 0.8:
         return 15
-    elif distance < 1.6:
+    elif distance < 2.2: 
         return 14
     elif distance < 3.2:
         return 13
