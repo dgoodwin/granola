@@ -172,10 +172,10 @@ class HtmlGenerator(object):
                     f.write("new GLatLng(%s, %s)," % (trackpoint.latitude, 
                         trackpoint.longitude))
         f.write("""                        ], "#0000ff", 3);""")
-        f.write("""map.addOverlay(new GMarker(new GLatLng(%s, %s)));""" %
-                (maxLat, maxLon))
-        f.write("""map.addOverlay(new GMarker(new GLatLng(%s, %s)));""" %
-                (minLat, minLon))
+        #f.write("""map.addOverlay(new GMarker(new GLatLng(%s, %s)));""" %
+        #        (maxLat, maxLon))
+        #f.write("""map.addOverlay(new GMarker(new GLatLng(%s, %s)));""" %
+        #        (minLat, minLon))
 
         f.write(HTML_FOOTER)
         f.close()
