@@ -41,10 +41,28 @@ HTML_HEADER = """
             if (GBrowserIsCompatible()) {
                 var map = new GMap2(document.getElementById("map_canvas"));
                 // Initialize map, should be done before everything else.
-                map.setCenter(new GLatLng(%s, %s), 14);
+                map.setCenter(new GLatLng(%s, %s), %s);
                 map.setMapType(G_SATELLITE_MAP);
                 map.setUIToDefault();
                 var polyline = new GPolyline([
+"""
+
+HTML_FOOTER = """
+                map.addControl(new GLargeMapControl());
+                map.addControl(new GLargeMapControl());
+                map.addOverlay(polyline);
+            }
+        } 
+        </script>
+  </head>
+
+  <body onload="initialize()">
+      <div id="map_canvas" style="width: 750px; height: 550px; float:center; border: 1px solid black;"></div>
+  </div>
+  <br clear="all"/>
+  <br/>
+  </body>
+</html>
 """
 
 EARTHS_RADIUS = 6372.797
@@ -76,23 +94,31 @@ def distance_between_coords(lat1, lon1, lat2, lon2):
     return km
 
 
-HTML_FOOTER = """
-                map.addControl(new GLargeMapControl());
-                map.addControl(new GLargeMapControl());
-                map.addOverlay(polyline);
-            }
-        } 
-        </script>
-  </head>
+def get_zoom_level(distance):
+    """
+    Return a guess at a Google Maps zoom level based on the given distance.
+    (in kilometers)
 
-  <body onload="initialize()">
-      <div id="map_canvas" style="width: 750px; height: 550px; float:center; border: 1px solid black;"></div>
-  </div>
-  <br clear="all"/>
-  <br/>
-  </body>
-</html>
-"""
+    Google's zoom levels go up to 16.
+    """
+    if distance < 0.32:
+        return 16
+    elif distance < 0.8:
+        return 15
+    elif distance < 1.6:
+        return 14
+    elif distance < 3.2:
+        return 13
+    elif distance < 4.8:
+        return 12
+    elif distance < 11.2:
+        return 11
+    elif distance < 24.0:
+        return 10
+    else: 
+        return 9
+
+
 
 class HtmlGenerator(object):
 
@@ -123,13 +149,16 @@ class HtmlGenerator(object):
 
         (maxLat, maxLon, minLat, minLon, centerLat, centerLon) = \
                 self._calculate_center_coords(self.activity)
+        span_km = distance_between_coords(maxLat, maxLon, minLat, minLon)
+        log.debug("Distance between coordinates: %s" % span_km)
+        zoom_level = get_zoom_level(span_km)
+        log.debug("Zoom level: %s" % zoom_level)
 
         title = "Granola Activity Map: %s (%s)" % (self.activity.start_time,
                 self.activity.sport.name)
-        # TODO: Find a better way to center the map than starting point.
         center_coords = self.activity.laps[0].tracks[0].trackpoints[0]
 
-        f.write(HTML_HEADER % (title, centerLat, centerLon))
+        f.write(HTML_HEADER % (title, centerLat, centerLon, zoom_level))
 
         # TODO: iterating trackpoints a second time but probably faster
         # than doing the string concatenation we'd have to do otherwise.
@@ -175,9 +204,6 @@ class HtmlGenerator(object):
                         minLat = min(minLat, trackpoint.latitude)
                         maxLon = max(maxLon, trackpoint.longitude)
                         minLon = min(minLon, trackpoint.longitude)
-
-        span_km = distance_between_coords(maxLat, maxLon, minLat, minLon)
-        log.debug("Distance between coordinates: %s" % span_km)
 
         centerLat = minLat + (maxLat - minLat) / 2
         centerLon = minLon + (maxLon - minLon) / 2
