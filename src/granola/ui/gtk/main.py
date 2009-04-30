@@ -67,23 +67,24 @@ class GranolaMainWindow(object):
         self.session = Session()
 
         glade_file = 'granola/glade/mainwindow.glade'
-        self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
-        main_window = self.glade_xml.get_widget('main_window')
+        self.glade_xml = gtk.Builder()
+        self.glade_xml.add_from_file(find_file_on_path(glade_file))
+        main_window = self.glade_xml.get_object('main_window')
 
         # Filter main list of activities based on this, None = show all.
         # Storing just the string name here.
         self.filter_sport = None
 
         # References to various widgets used throughout the class:
-        self.activity_popup_menu = self.glade_xml.get_widget(
+        self.activity_popup_menu = self.glade_xml.get_object(
                 'activity_popup_menu')
-        self.activity_tv = self.glade_xml.get_widget('activity_treeview')
-        self.metrics_tv = self.glade_xml.get_widget('metrics_treeview')
-        self.sport_filter_combobox = self.glade_xml.get_widget(
+        self.activity_tv = self.glade_xml.get_object('activity_treeview')
+        self.metrics_tv = self.glade_xml.get_object('metrics_treeview')
+        self.sport_filter_combobox = self.glade_xml.get_object(
                 'sport_filter_combobox')
-        self.metrics_sport_combo = self.glade_xml.get_widget(
+        self.metrics_sport_combo = self.glade_xml.get_object(
                 'metrics_sport_combo')
-        self.metrics_timeslice_combo = self.glade_xml.get_widget(
+        self.metrics_timeslice_combo = self.glade_xml.get_object(
                 'metrics_timeslice_combo')
 
         signals = {
@@ -99,7 +100,7 @@ class GranolaMainWindow(object):
             'on_sport_filter_combobox_changed':
                 self.filter_sport_cb,
         }
-        self.glade_xml.signal_autoconnect(signals)
+        self.glade_xml.connect_signals(signals)
 
         self.init_ui()
 
@@ -157,7 +158,7 @@ class GranolaMainWindow(object):
         time_column.set_attributes(cell, text=3)
         avg_speed_column.set_attributes(cell, text=4)
 
-        self.lap_tv = self.glade_xml.get_widget('lap_treeview')
+        self.lap_tv = self.glade_xml.get_object('lap_treeview')
 
         # Setup lap treeview columns:
         number_column = gtk.TreeViewColumn("Lap")
@@ -407,13 +408,13 @@ class GranolaMainWindow(object):
         """
         Display an activities details. (below the activities list)
         """
-        start_time_widget = self.glade_xml.get_widget('activity_date_display')
-        time_widget = self.glade_xml.get_widget('activity_time_display')
-        distance_widget = self.glade_xml.get_widget(
+        start_time_widget = self.glade_xml.get_object('activity_date_display')
+        time_widget = self.glade_xml.get_object('activity_time_display')
+        distance_widget = self.glade_xml.get_object(
             'activity_distance_display')
-        speed_widget = self.glade_xml.get_widget('activity_speed_display')
-        pace_widget = self.glade_xml.get_widget('activity_pace_display')
-        avg_hr_widget = self.glade_xml.get_widget('activity_hr_display')
+        speed_widget = self.glade_xml.get_object('activity_speed_display')
+        pace_widget = self.glade_xml.get_object('activity_pace_display')
+        avg_hr_widget = self.glade_xml.get_object('activity_hr_display')
 
         duration_seconds = activity.duration
         hours = duration_seconds / 3600
@@ -515,15 +516,17 @@ class PreferencesDialog(object):
         self.config = config
 
         glade_file = 'granola/glade/prefs-dialog.glade'
-        self.glade_xml = gtk.glade.XML(find_file_on_path(glade_file))
-        self.preferences_dialog = self.glade_xml.get_widget("prefs_dialog")
+        self.glade_xml = gtk.Builder()
+        self.glade_xml.add_from_file(find_file_on_path(glade_file))
+        self.preferences_dialog = self.glade_xml.get_object("prefs_dialog")
 
         signals = {
             'on_apply_button_clicked': self.apply_prefs,
             'on_cancel_button_clicked': self.cancel,
         }
-        self.glade_xml.signal_autoconnect(signals)
-        self.import_folder_chooser = self.glade_xml.get_widget(
+        self.glade_xml.connect_signals(signals)
+
+        self.import_folder_chooser = self.glade_xml.get_object(
                 "import_folder_filechooserbutton")
         self.import_folder_chooser.set_filename(
                 self.config.get("import", "import_folder"))

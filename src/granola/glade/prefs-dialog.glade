@@ -1,67 +1,74 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Sun Mar  1 13:03:13 2009 -->
-<glade-interface>
-  <widget class="GtkWindow" id="prefs_dialog">
+<?xml version="1.0"?>
+<interface>
+  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-naming-policy toplevel-contextual -->
+  <object class="GtkWindow" id="prefs_dialog">
     <property name="width_request">400</property>
     <property name="height_request">100</property>
-    <property name="window_position">GTK_WIN_POS_CENTER</property>
+    <property name="window_position">center</property>
     <child>
-      <widget class="GtkVBox" id="vbox4">
+      <object class="GtkVBox" id="vbox4">
         <property name="visible">True</property>
         <child>
-          <widget class="GtkHBox" id="hbox5">
+          <object class="GtkHBox" id="hbox5">
             <property name="visible">True</property>
             <child>
-              <widget class="GtkLabel" id="label1">
+              <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Import Directory:</property>
-              </widget>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
             </child>
             <child>
-              <widget class="GtkFileChooserButton" id="import_folder_filechooserbutton">
+              <object class="GtkFileChooserButton" id="import_folder_filechooserbutton">
                 <property name="visible">True</property>
-                <property name="action">GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER</property>
+                <property name="action">select-folder</property>
                 <property name="title" translatable="yes">Select A Folder</property>
-              </widget>
+              </object>
               <packing>
                 <property name="position">1</property>
               </packing>
             </child>
-          </widget>
+          </object>
+          <packing>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
-          <widget class="GtkHBox" id="hbox7">
+          <object class="GtkHBox" id="hbox7">
             <property name="visible">True</property>
             <child>
-              <widget class="GtkButton" id="apply_button">
+              <object class="GtkButton" id="apply_button">
+                <property name="label" translatable="yes">Apply</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">Apply</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_apply_button_clicked"/>
-              </widget>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
             </child>
             <child>
-              <widget class="GtkButton" id="cancel_button">
+              <object class="GtkButton" id="cancel_button">
+                <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="label" translatable="yes">Cancel</property>
-                <property name="response_id">0</property>
                 <signal name="clicked" handler="on_cancel_button_clicked"/>
-              </widget>
+              </object>
               <packing>
                 <property name="position">1</property>
               </packing>
             </child>
-          </widget>
+          </object>
           <packing>
             <property name="position">1</property>
           </packing>
         </child>
-      </widget>
+      </object>
     </child>
-  </widget>
-</glade-interface>
+  </object>
+</interface>
