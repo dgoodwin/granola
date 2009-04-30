@@ -80,6 +80,10 @@ class GranolaMainWindow(object):
         self.activity_tv = self.glade_xml.get_widget('activity_treeview')
         self.sport_filter_combobox = self.glade_xml.get_widget(
                 'sport_filter_combobox')
+        self.metrics_sport_combo = self.glade_xml.get_widget(
+                'metrics_sport_combo')
+        self.metrics_timeslice_combo = self.glade_xml.get_widget(
+                'metrics_timeslice_combo')
 
         signals = {
             'on_quit_menu_item_activate': self.shutdown,
@@ -140,7 +144,7 @@ class GranolaMainWindow(object):
         time_column.pack_start(cell, expand=False)
         avg_speed_column.pack_start(cell, expand=False)
 
-        sport_column.set_attributes(cell, text=6)
+        sport_column.set_attributes(cell, text=5)
         date_column.set_attributes(cell, text=1)
         distance_column.set_attributes(cell, text=2)
         time_column.set_attributes(cell, text=3)
@@ -180,29 +184,46 @@ class GranolaMainWindow(object):
         avg_hr_column.set_attributes(cell, text=4)
         max_hr_column.set_attributes(cell, text=5)
 
-        # Populate sport filter combobox with the sports in the database:
-        sports_liststore = gtk.ListStore(str)
-        self.sport_filter_combobox.set_model(sports_liststore)
-        cell = gtk.CellRendererText()
-        self.sport_filter_combobox.pack_start(cell, True)
-        self.sport_filter_combobox.add_attribute(cell, 'text', 0)
-
-        self.sport_filter_combobox.append_text("all")
-        q = self.session.query(Sport).order_by(Sport.name)
-        for sport in q.all():
-            self.sport_filter_combobox.append_text(sport.name)
-        # Activate the first item for All:
-        iter = sports_liststore.get_iter_first()
-        self.sport_filter_combobox.set_active_iter(iter)
+        self.populate_sport_combos()
+        self.populate_metrics_timeslice_combo()
 
     def open_prefs_dialog(self, widget):
         prefs_dialog = PreferencesDialog(self.config)
 
+    def populate_sport_combos(self):
+        """ Populate the 'sport' dropdowns. """
+        sports_liststore = gtk.ListStore(str)
+        sports_liststore2 = gtk.ListStore(str)
+
+        self.sport_filter_combobox.set_model(sports_liststore)
+
+        cell = gtk.CellRendererText()
+        self.sport_filter_combobox.pack_start(cell, True)
+        self.sport_filter_combobox.add_attribute(cell, 'text', 0)
+        self.sport_filter_combobox.append_text("all")
+
+        self.metrics_sport_combo.set_model(sports_liststore2)
+        cell = gtk.CellRendererText()
+        self.metrics_sport_combo.pack_start(cell, True)
+        self.metrics_sport_combo.add_attribute(cell, 'text', 0)
+        self.metrics_sport_combo.append_text("all")
+
+        q = self.session.query(Sport).order_by(Sport.name)
+        for sport in q.all():
+            self.sport_filter_combobox.append_text(sport.name)
+            self.metrics_sport_combo.append_text(sport.name)
+
+        # Activate the first item for All:
+        iter = sports_liststore.get_iter_first()
+        self.sport_filter_combobox.set_active_iter(iter)
+        iter = sports_liststore2.get_iter_first()
+        self.metrics_sport_combo.set_active_iter(iter)
+
     def populate_activities(self):
         """ Populate activity list. """
 
-        running_liststore = self.build_activity_liststore()
-        self.activity_tv.set_model(running_liststore)
+        activity_liststore = self.build_activity_liststore()
+        self.activity_tv.set_model(activity_liststore)
 
     def build_activity_liststore(self):
         """
@@ -238,6 +259,52 @@ class GranolaMainWindow(object):
             ])
 
         return list_store
+
+    def populate_metrics_timeslice_combo(self):
+        """ Populate the metrics timeslice dropdown. """
+        timeslice_liststore = gtk.ListStore(str)
+
+        self.metrics_timeslice_combo.set_model(timeslice_liststore)
+
+        cell = gtk.CellRendererText()
+        self.metrics_timeslice_combo.pack_start(cell, True)
+        self.metrics_timeslice_combo.add_attribute(cell, 'text', 0)
+
+        self.metrics_timeslice_combo.append_text("monthly")
+        self.metrics_timeslice_combo.append_text("yearly")
+        self.metrics_timeslice_combo.append_text("my seasons")
+
+        # Activate the first item:
+        iter = timeslice_liststore.get_iter_first()
+        self.metrics_timeslice_combo.set_active_iter(iter)
+
+    def activity_tv_click_cb(self, treeview, event):
+
+        # Handle both left and right mouse button clicks:
+        if event.button == 3 or event.button == 1:
+            x = int(event.x)
+            y = int(event.y)
+            time = event.time
+
+            # Select the row:
+            pthinfo = treeview.get_path_at_pos(x, y)
+            if pthinfo is not None:
+                path, col, cellx, celly = pthinfo
+                # path[0] appears to be the row here:
+                treeview.grab_focus()
+                treeview.set_cursor(path, col, 0)
+                selection = self.activity_tv.get_selection()
+                (model, iter) = selection.get_selected()
+                # Lookup the activity object rather than rely on model columns:
+                activity = self.session.query(Activity).filter(Activity.id ==
+                        model.get_value(iter, 0)).one()
+                self.display_activity(activity)
+
+            # Now handle only right clicks:
+            if event.button == 3:
+                self.activity_popup_menu.popup(None, None, None,
+                        event.button, time)
+                self.activity_tv = treeview
 
     def display_activity(self, activity):
         """
@@ -299,35 +366,6 @@ class GranolaMainWindow(object):
 
         self.lap_tv.set_model(lap_liststore)
 
-    def activity_tv_click_cb(self, treeview, event):
-
-        # Handle both left and right mouse button clicks:
-        if event.button == 3 or event.button == 1:
-            x = int(event.x)
-            y = int(event.y)
-            time = event.time
-
-            # Select the row:
-            pthinfo = treeview.get_path_at_pos(x, y)
-            if pthinfo is not None:
-                path, col, cellx, celly = pthinfo
-                # path[0] appears to be the row here:
-                treeview.grab_focus()
-                treeview.set_cursor(path, col, 0)
-                selection = self.activity_tv.get_selection()
-                (model, iter) = selection.get_selected()
-                # Lookup the activity object rather than rely on model columns:
-                activity = self.session.query(Activity).filter(Activity.id ==
-                        model.get_value(iter, 0)).one()
-                self.display_activity(activity)
-
-            # Now handle only right clicks:
-            if event.button == 3:
-                self.activity_popup_menu.popup(None, None, None,
-                        event.button, time)
-                self.activity_tv = treeview
-
-#    def activity_show_map_cb(self, widget):
     def activity_tv_doubleclick_cb(self, treeview, path, view_column):
         """
         Open details window to display map for this activity.
