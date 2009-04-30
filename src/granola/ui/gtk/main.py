@@ -78,6 +78,7 @@ class GranolaMainWindow(object):
         self.activity_popup_menu = self.glade_xml.get_widget(
                 'activity_popup_menu')
         self.activity_tv = self.glade_xml.get_widget('activity_treeview')
+        self.metrics_tv = self.glade_xml.get_widget('metrics_treeview')
         self.sport_filter_combobox = self.glade_xml.get_widget(
                 'sport_filter_combobox')
         self.metrics_sport_combo = self.glade_xml.get_widget(
@@ -88,7 +89,7 @@ class GranolaMainWindow(object):
         signals = {
             'on_quit_menu_item_activate': self.shutdown,
             'on_main_window_destroy': self.shutdown,
-            'on_prefs_menu_item_activate': self.open_prefs_dialog,
+            'on_prefs_menu_item_activate': self.open_prefs_dialog_cb,
             'on_activity_treeview_button_press_event':
                 self.activity_tv_click_cb,
             'on_activity_popup_delete_activate':
@@ -108,6 +109,7 @@ class GranolaMainWindow(object):
                 Sport.name == BIKING).one()
 
         self.populate_activities()
+        self.populate_metrics()
 
         main_window.show_all()
 
@@ -121,8 +123,13 @@ class GranolaMainWindow(object):
 
     def init_ui(self):
         """
-        Initialize some UI components, things we need to do just once.
+        Initialize UI components, things we need to do just once.
         """
+        self.init_activities_tab()
+        self.init_metrics_tab()
+
+    def init_activities_tab(self):
+        """ On startup initialization of the Activities tab. """
         # Setup activity treeview columns:
         sport_column = gtk.TreeViewColumn("Sport")
         date_column = gtk.TreeViewColumn("Date")
@@ -149,7 +156,6 @@ class GranolaMainWindow(object):
         distance_column.set_attributes(cell, text=2)
         time_column.set_attributes(cell, text=3)
         avg_speed_column.set_attributes(cell, text=4)
-
 
         self.lap_tv = self.glade_xml.get_widget('lap_treeview')
 
@@ -185,10 +191,41 @@ class GranolaMainWindow(object):
         max_hr_column.set_attributes(cell, text=5)
 
         self.populate_sport_combos()
-        self.populate_metrics_timeslice_combo()
 
-    def open_prefs_dialog(self, widget):
-        prefs_dialog = PreferencesDialog(self.config)
+    def init_metrics_tab(self):
+        """ On startup initialization of the Metrics tab. """
+        # Setup metrics treeview columns:
+        period_column = gtk.TreeViewColumn("Period")
+        distance_column = gtk.TreeViewColumn("Distance (km)")
+        time_column = gtk.TreeViewColumn("Time")
+        avg_speed_column = gtk.TreeViewColumn("Speed (km/hr)")
+        pace_column = gtk.TreeViewColumn("Pace (min/km)")
+        avg_hr_column = gtk.TreeViewColumn("Heart Rate")
+
+        self.metrics_tv.append_column(period_column)
+        self.metrics_tv.append_column(distance_column)
+        self.metrics_tv.append_column(time_column)
+        self.metrics_tv.append_column(avg_speed_column)
+        self.metrics_tv.append_column(pace_column)
+        self.metrics_tv.append_column(avg_hr_column)
+
+        cell = gtk.CellRendererText()
+
+        period_column.pack_start(cell, expand=False)
+        distance_column.pack_start(cell, expand=False)
+        time_column.pack_start(cell, expand=False)
+        avg_speed_column.pack_start(cell, expand=False)
+        pace_column.pack_start(cell, expand=False)
+        avg_hr_column.pack_start(cell, expand=False)
+
+        period_column.set_attributes(cell, text=0)
+        distance_column.set_attributes(cell, text=1)
+        time_column.set_attributes(cell, text=2)
+        avg_speed_column.set_attributes(cell, text=3)
+        pace_column.set_attributes(cell, text=4)
+        avg_hr_column.set_attributes(cell, text=5)
+
+        self.populate_metrics_timeslice_combo()
 
     def populate_sport_combos(self):
         """ Populate the 'sport' dropdowns. """
@@ -260,6 +297,63 @@ class GranolaMainWindow(object):
 
         return list_store
 
+    def populate_metrics(self):
+        """ 
+        Populate metrics. 
+
+        Call this whenever we need to update the metrics displayed based on
+        some action by the user.
+        """
+
+        metrics_liststore = self.build_metrics_liststore()
+        self.metrics_tv.set_model(metrics_liststore)
+
+    def build_metrics_liststore(self):
+        """
+        Return a ListStore with totals for the metrics tab.
+
+        Results depend heavily on the values currently selected in the 
+        timeslice and sport comboboxes.
+        """
+        list_store = gtk.ListStore(
+                str, # period
+                str, # distance
+                str, #time
+                str, # avg speed
+                str, # pace
+                str, # avg heart rate
+        )
+
+        #q = self.session.query(Activity).order_by(Activity.start_time.desc())
+        #if self.filter_sport is not None:
+        #    q = q.filter(Activity.sport == self.filter_sport)
+        ##q = self.session.query(Activity).filter(Activity.sport ==
+        ##        sport).order_by(Activity.start_time.desc())
+        #for run in q.all():
+        #    duration_seconds = run.duration
+        #    hours = duration_seconds / 3600
+        #    minutes = (duration_seconds / 60) % 60
+        #    seconds = duration_seconds % 60
+
+        #    list_store.append([
+        #        run.id,
+        #        run.start_time.strftime("%Y-%m-%d"),
+        #        "%.2f" % (run.distance / 1000),
+        #        "%02i:%02i:%02i" % (hours, minutes, seconds),
+        #        "%.2f" % ((run.distance / 1000) / (duration_seconds / 3600)),
+        #        run.sport.name,
+        #    ])
+        list_store.append([
+            "Jan 2008",
+            "30",
+            "12:00",
+            "15.00",
+            "25",
+            "150"
+        ])
+
+        return list_store
+
     def populate_metrics_timeslice_combo(self):
         """ Populate the metrics timeslice dropdown. """
         timeslice_liststore = gtk.ListStore(str)
@@ -277,6 +371,9 @@ class GranolaMainWindow(object):
         # Activate the first item:
         iter = timeslice_liststore.get_iter_first()
         self.metrics_timeslice_combo.set_active_iter(iter)
+
+    def open_prefs_dialog_cb(self, widget):
+        prefs_dialog = PreferencesDialog(self.config)
 
     def activity_tv_click_cb(self, treeview, event):
 
