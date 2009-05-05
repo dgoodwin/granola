@@ -448,6 +448,7 @@
                     <child>
                       <object class="GtkComboBox" id="metrics_sport_combo">
                         <property name="visible">True</property>
+                        <signal name="changed" handler="on_metrics_sport_combo_changed"/>
                       </object>
                       <packing>
                         <property name="position">1</property>

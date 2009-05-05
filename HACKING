@@ -1,0 +1,9 @@
+- Pull .tcx (XML) files off your Garmin device, suggest using garmin-sync.
+
+- Run from source with something like:
+  
+    PYTHONPATH=/home/dev/src/granola/src bin/granola
+
+- Run unit tests using python-nose package:
+
+    nosetests

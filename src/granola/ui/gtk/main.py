@@ -23,7 +23,6 @@
 import pygtk
 pygtk.require('2.0')
 import gtk
-import gtk.glade
 import gobject
 import os
 import sys
@@ -74,6 +73,7 @@ class GranolaMainWindow(object):
         # Filter main list of activities based on this, None = show all.
         # Storing just the string name here.
         self.filter_sport = None
+        self.metrics_sport = None
 
         # References to various widgets used throughout the class:
         self.activity_popup_menu = self.glade_xml.get_object(
@@ -98,7 +98,9 @@ class GranolaMainWindow(object):
             'on_activity_treeview_row_activated':
                 self.activity_tv_doubleclick_cb,
             'on_sport_filter_combobox_changed':
-                self.filter_sport_cb,
+                self.activities_sport_combo_cb,
+            'on_metrics_sport_combo_changed':
+                self.metrics_sport_combo_cb,
         }
         self.glade_xml.connect_signals(signals)
 
@@ -244,7 +246,7 @@ class GranolaMainWindow(object):
         cell = gtk.CellRendererText()
         self.metrics_sport_combo.pack_start(cell, True)
         self.metrics_sport_combo.add_attribute(cell, 'text', 0)
-        self.metrics_sport_combo.append_text("all")
+        #self.metrics_sport_combo.append_text("all")
 
         q = self.session.query(Sport).order_by(Sport.name)
         for sport in q.all():
@@ -324,6 +326,31 @@ class GranolaMainWindow(object):
                 str, # pace
                 str, # avg heart rate
         )
+
+        # Now things get interesting. We'll grab a list of all activities 
+        # sorted by date. The sort method could be monthly, yearly, or
+        # user defined, so assume we iterate activities until we cross
+        # a date we're interested (as determined by some encapsulated logic) 
+        # in starting a new timeslice after, populate
+        # the liststore entry when we cross, reset the totals, and begin 
+        # counting again:
+        log.debug("Calculating metrics:")
+
+        # Grab all activities for now, may need to chop it up if we run
+        # into memory problems down the line:
+
+        q = self.session.query(Activity).order_by(Activity.start_time.desc())
+        q = q.filter(Activity.sport == self.metrics_sport)
+        activities = q.all()
+        log.debug("Found %s activities for sport: %s." % (len(activities), 
+            self.metrics_sport))
+
+        iter = self.metrics_timeslice_combo.get_active_iter()
+        timeslice = self.metrics_timeslice_combo.get_model().get_value(iter, 0)
+
+        # OR should we do it with queries? Find first and last activity dates,
+        # use boundaries to construct queries, display the results even if
+        # empty.
 
         #q = self.session.query(Activity).order_by(Activity.start_time.desc())
         #if self.filter_sport is not None:
@@ -494,12 +521,12 @@ class GranolaMainWindow(object):
         # model?
         self.populate_activities()
 
-    def filter_sport_cb(self, widget):
+    def activities_sport_combo_cb(self, widget):
         """
         Callback for when user changes the filter on sport.
         """
-        iter = self.sport_filter_combobox.get_active_iter()
-        filter_name = self.sport_filter_combobox.get_model().get_value(iter, 0)
+        iter = widget.get_active_iter()
+        filter_name = widget.get_model().get_value(iter, 0)
         if filter_name == FILTER_ALL:
             self.filter_sport = None
         else:
@@ -507,6 +534,20 @@ class GranolaMainWindow(object):
                     Sport.name == filter_name).one()
 
         self.populate_activities()
+
+    def metrics_sport_combo_cb(self, widget):
+        """
+        Callback for when user changes the filter on sport.
+        """
+        iter = widget.get_active_iter()
+        filter_name = widget.get_model().get_value(iter, 0)
+        if filter_name == FILTER_ALL:
+            self.metrics_sport = None
+        else:
+            self.metrics_sport = self.session.query(Sport).filter(
+                    Sport.name == filter_name).one()
+
+        self.populate_metrics()
 
 
 class PreferencesDialog(object):
