@@ -77,6 +77,28 @@ def find_season(activity_date, seasons):
 
     return SeasonSlice(the_season, start_date, end_date)
 
+#def build_all_slices(seasons, starting_slice, end_date):
+#    """
+#    Return a list of all season slices using the defined seasons,
+#    the first concrete slice to begin with, and an end date.
+
+#    NOTE: the starting slice *is* returned at the start of the list.
+#    """
+
+#    # What season does the starting slice point to?
+#    season_index = 0
+#    for s in seasons:
+#        if s.month == starting_slice.start_date.month and \
+#                s.day == starting_slice.start_date.day:
+#                    break
+#        else:
+#            season_index += 1
+
+#    all_slices = [starting_slice]
+#    while all_slices[-1].end_date <= end_date:
+#        next_season = seasons[
+#        new_slice = 
+
 
 class Season(object):
     """ 
@@ -111,3 +133,23 @@ class LeapDaySeasonBoundaryException(Exception):
     leap day. 
     """
     pass
+
+
+# While we're doing all this insanity to support user defined "seasons",
+# may as well leverage the same code to do monthly and yearly slices:
+# TODO: I18N problem here:
+MONTHLY_SEASONS = [
+        Season(1, 1, "January"),
+        Season(2, 1, "February"),
+        Season(3, 1, "March"),
+        Season(4, 1, "April"),
+        Season(5, 1, "May"),
+        Season(6, 1, "June"),
+        Season(7, 1, "July"),
+        Season(8, 1, "August"),
+        Season(9, 1, "September"),
+        Season(10, 1, "October"),
+        Season(11, 1, "November"),
+        Season(12, 1, "December")
+]
+YEARLY_SEASONS = [Season(1, 1, "Some Year")] # TODO: not the best name eh?

@@ -31,6 +31,7 @@ from granola.log import log
 from granola.model import *
 from granola.ui.gtk.browser import *
 from granola import write_config
+from granola.season import *
 
 RUNNING = "running"
 BIKING = "biking"
@@ -340,18 +341,30 @@ class GranolaMainWindow(object):
         # season start/end dates for each season that follows it up until
         # we cross the date of our last activity. Then construct queries.
 
+        # Grab the first activity date:
+        q = self.session.query(Activity).order_by(Activity.start_time)
+        q = q.filter(Activity.sport == self.metrics_sport).limit(1)
+        first_activity = q.first()
+        if first_activity is None:
+            # No activies for the current type, not much we can do here:
+            return
+        log.debug("First %s activity: %s" % (self.metrics_sport, 
+            first_activity.start_time))
+
         q = self.session.query(Activity).order_by(Activity.start_time.desc())
         q = q.filter(Activity.sport == self.metrics_sport).limit(1)
-        activities = q.all()
-        log.debug("Found %s activities for sport: %s." % (len(activities), 
-            self.metrics_sport))
+        last_activity = q.first()
+        log.debug("Last %s activity: %s" % (self.metrics_sport, 
+            last_activity.start_time))
 
         iter = self.metrics_timeslice_combo.get_active_iter()
         timeslice = self.metrics_timeslice_combo.get_model().get_value(iter, 0)
-
-        # OR should we do it with queries? Find first and last activity dates,
-        # use boundaries to construct queries, display the results even if
-        # empty.
+        log.debug("Current metrics timeslice: %s" % timeslice)
+        seasons = None
+        if timeslice == "monthly":
+            seasons = MONTHLY_SEASONS
+        elif timeslice == "yearly":
+            seasons = YEARLY_SEASONS
 
         #q = self.session.query(Activity).order_by(Activity.start_time.desc())
         #if self.filter_sport is not None:
@@ -393,6 +406,7 @@ class GranolaMainWindow(object):
         self.metrics_timeslice_combo.pack_start(cell, True)
         self.metrics_timeslice_combo.add_attribute(cell, 'text', 0)
 
+        # TODO: I18N problem here:
         self.metrics_timeslice_combo.append_text("monthly")
         self.metrics_timeslice_combo.append_text("yearly")
         #self.metrics_timeslice_combo.append_text("my seasons")
@@ -400,6 +414,19 @@ class GranolaMainWindow(object):
         # Activate the first item:
         iter = timeslice_liststore.get_iter_first()
         self.metrics_timeslice_combo.set_active_iter(iter)
+
+    def get_metrics_timeslice(self):
+        """ 
+        Return the string representation of the metrics timeslice
+        currently selected.
+        """
+        iter = self.metrics_timeslice_combo.get_active_iter()
+        model = self.metrics_timeslice_combo.get_model()
+        current_timeslice = model.get_value(iter, 0)
+        if current_timeslice is None:
+            raise Exception("No current metrics timeslice slected?")
+        return current_timeslice
+        
 
     def open_prefs_dialog_cb(self, widget):
         prefs_dialog = PreferencesDialog(self.config)
