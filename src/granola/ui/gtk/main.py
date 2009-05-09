@@ -87,6 +87,8 @@ class GranolaMainWindow(object):
         self.metrics_timeslice_combo = self.glade_xml.get_object(
                 'metrics_timeslice_combo')
 
+        self.init_ui()
+
         signals = {
             'on_quit_menu_item_activate': self.shutdown,
             'on_main_window_destroy': self.shutdown,
@@ -104,7 +106,6 @@ class GranolaMainWindow(object):
         }
         self.glade_xml.connect_signals(signals)
 
-        self.init_ui()
 
         self.running = self.session.query(Sport).filter(
                 Sport.name == RUNNING).one()
@@ -134,6 +135,7 @@ class GranolaMainWindow(object):
     def init_activities_tab(self):
         """ On startup initialization of the Activities tab. """
         # Setup activity treeview columns:
+        log.debug("Initializing activities tab.")
         sport_column = gtk.TreeViewColumn("Sport")
         date_column = gtk.TreeViewColumn("Date")
         distance_column = gtk.TreeViewColumn("Distance (km)")
@@ -198,6 +200,7 @@ class GranolaMainWindow(object):
     def init_metrics_tab(self):
         """ On startup initialization of the Metrics tab. """
         # Setup metrics treeview columns:
+        log.debug("Initializing metrics tab.")
         period_column = gtk.TreeViewColumn("Period")
         distance_column = gtk.TreeViewColumn("Distance (km)")
         time_column = gtk.TreeViewColumn("Time")
@@ -249,7 +252,8 @@ class GranolaMainWindow(object):
         #self.metrics_sport_combo.append_text("all")
 
         q = self.session.query(Sport).order_by(Sport.name)
-        for sport in q.all():
+        sports = q.all()
+        for sport in sports:
             self.sport_filter_combobox.append_text(sport.name)
             self.metrics_sport_combo.append_text(sport.name)
 
@@ -258,6 +262,7 @@ class GranolaMainWindow(object):
         self.sport_filter_combobox.set_active_iter(iter)
         iter = sports_liststore2.get_iter_first()
         self.metrics_sport_combo.set_active_iter(iter)
+        self.metrics_sport = sports[0]
 
     def populate_activities(self):
         """ Populate activity list. """
@@ -308,6 +313,7 @@ class GranolaMainWindow(object):
         some action by the user.
         """
 
+        log.debug("Populating metrics.")
         metrics_liststore = self.build_metrics_liststore()
         self.metrics_tv.set_model(metrics_liststore)
 
@@ -327,20 +333,15 @@ class GranolaMainWindow(object):
                 str, # avg heart rate
         )
 
-        # Now things get interesting. We'll grab a list of all activities 
-        # sorted by date. The sort method could be monthly, yearly, or
-        # user defined, so assume we iterate activities until we cross
-        # a date we're interested (as determined by some encapsulated logic) 
-        # in starting a new timeslice after, populate
-        # the liststore entry when we cross, reset the totals, and begin 
-        # counting again:
         log.debug("Calculating metrics:")
 
-        # Grab all activities for now, may need to chop it up if we run
-        # into memory problems down the line:
+        # Now things get interesting. Start with the earliest activity, 
+        # determine which season it falls into, then calculate the actual
+        # season start/end dates for each season that follows it up until
+        # we cross the date of our last activity. Then construct queries.
 
         q = self.session.query(Activity).order_by(Activity.start_time.desc())
-        q = q.filter(Activity.sport == self.metrics_sport)
+        q = q.filter(Activity.sport == self.metrics_sport).limit(1)
         activities = q.all()
         log.debug("Found %s activities for sport: %s." % (len(activities), 
             self.metrics_sport))
@@ -384,8 +385,8 @@ class GranolaMainWindow(object):
 
     def populate_metrics_timeslice_combo(self):
         """ Populate the metrics timeslice dropdown. """
+        log.debug("Populating metrics timeslice dropdown.")
         timeslice_liststore = gtk.ListStore(str)
-
         self.metrics_timeslice_combo.set_model(timeslice_liststore)
 
         cell = gtk.CellRendererText()
@@ -394,7 +395,7 @@ class GranolaMainWindow(object):
 
         self.metrics_timeslice_combo.append_text("monthly")
         self.metrics_timeslice_combo.append_text("yearly")
-        self.metrics_timeslice_combo.append_text("my seasons")
+        #self.metrics_timeslice_combo.append_text("my seasons")
 
         # Activate the first item:
         iter = timeslice_liststore.get_iter_first()
