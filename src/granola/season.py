@@ -28,9 +28,9 @@ from granola.log import log
 # pile of things to worry about below if we want to get it right. Maybe
 # get the user to define their timezone (or use system's), and let the
 # chips fall where they may wrt activities.
-def find_season(activity_date, seasons):
+def create_first_slice(seasons, activity_date):
     """
-    Create the appropriate season object for the given activity date.
+    Create the appropriate season slice for the given activity date.
 
     Uses the given list of seasons to identify which season this
     activity falls into.
@@ -71,17 +71,17 @@ def find_season(activity_date, seasons):
         next_season.month, next_season.day))
     return SeasonSlice(the_season, start_date, next_season)
 
-def build_all_slices(seasons, starting_slice, end_date):
+def build_season_slices(seasons, first_activity_date, last_activity_date):
     """
-    Return a list of all season slices using the defined seasons,
-    the first concrete slice to begin with, and an end date.
+    Return a list of all season slices using the configured season boundaries,
+    first activity date, and last activity date. 
+    """
 
-    NOTE: the starting slice *is* returned at the start of the list.
-    """
+    starting_slice = create_first_slice(seasons, first_activity_date)
 
     log.debug("Building all season slices:")
     log.debug("   starting slice: %s" % starting_slice)
-    log.debug("   last activity: %s" % end_date)
+    log.debug("   last activity: %s" % last_activity_date)
     # What season does the starting slice point to?
     season_index = 0
     for s in seasons:
@@ -95,9 +95,8 @@ def build_all_slices(seasons, starting_slice, end_date):
     # Keep building season slices until one ends beyond the date of
     # our last activity:
     all_slices = [starting_slice]
-    while all_slices[-1].end_date <= end_date:
+    while all_slices[-1].end_date <= last_activity_date:
         log.debug("Building new slice:")
-        #log.debug("   all_slices = %s" % all_slices)
         season_index = (season_index + 1) % len(seasons)
         next_season = seasons[season_index]
         log.debug("   next_season = %s" % next_season)

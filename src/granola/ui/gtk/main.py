@@ -366,9 +366,7 @@ class GranolaMainWindow(object):
         elif timeslice == "yearly":
             seasons = YEARLY_SEASONS
 
-        first_slice = find_season(first_activity.start_time, seasons)
-
-        slices = build_all_slices(seasons, first_slice, 
+        slices = build_all_slices(seasons, first_activity.start_time, 
                 last_activity.start_time)
 
         #q = self.session.query(Activity).order_by(Activity.start_time.desc())
