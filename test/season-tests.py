@@ -63,6 +63,20 @@ class SeasonTests(unittest.TestCase):
         all_slices = build_all_slices(self.seasons, season_slice,
                 last_activity_date)
 
+    def test_monthly_seasons(self):
+        first_activity_date = datetime(2008, 12, 26, 15, 30)
+        last_activity_date = datetime(2009, 02, 22, 17, 0)
+        season_slice = find_season(first_activity_date, MONTHLY_SEASONS)
+        all_slices = build_all_slices(MONTHLY_SEASONS, season_slice, 
+                last_activity_date)
+        self.assertEquals(3, len(all_slices))
+        self.assertEquals("December", all_slices[0].season.name)
+        self.assertEquals("January", all_slices[1].season.name)
+        self.assertEquals("February", all_slices[2].season.name)
+        self.assertEquals(2008, all_slices[0].start_date.year)
+        self.assertEquals(2009, all_slices[1].start_date.year)
+        self.assertEquals(2009, all_slices[2].start_date.year)
+
 
         
 

@@ -37,15 +37,18 @@ def find_season(activity_date, seasons):
     """
     the_season = None
     i = 0
+    season_index = None
     for s in seasons:
         if s.month <= activity_date.month and s.day <= activity_date.day:
             the_season = s
+            season_index = i
         i = i + 1
 
     # If we couldn't find a season that starts before our activity date,
     # we want the last one. (which must wrap around over the year)
     if the_season is None:
         the_season = seasons[-1]
+        season_index = len(seasons) - 1
 
     # Should have found the season with the start date closest to our 
     # activity by now, so we create the slice for it:
@@ -63,7 +66,7 @@ def find_season(activity_date, seasons):
     log.debug("start_date = %s" % start_date)
 
     # Now for the end date:
-    next_season = seasons[(i + 1) % len(seasons)]
+    next_season = seasons[(season_index + 1) % len(seasons)]
     log.debug("next season %s: %s - %s" % (next_season.name, 
         next_season.month, next_season.day))
     return SeasonSlice(the_season, start_date, next_season)
@@ -76,6 +79,9 @@ def build_all_slices(seasons, starting_slice, end_date):
     NOTE: the starting slice *is* returned at the start of the list.
     """
 
+    log.debug("Building all season slices:")
+    log.debug("   starting slice: %s" % starting_slice)
+    log.debug("   last activity: %s" % end_date)
     # What season does the starting slice point to?
     season_index = 0
     for s in seasons:
@@ -84,17 +90,23 @@ def build_all_slices(seasons, starting_slice, end_date):
                     break
         else:
             season_index += 1
+    log.debug("season_index = %s" % season_index)
 
     # Keep building season slices until one ends beyond the date of
     # our last activity:
     all_slices = [starting_slice]
     while all_slices[-1].end_date <= end_date:
-        next_season = seasons[(season_index + 1) % len(seasons)]
-        start_date = all_slices[-1].end_date + timedelta(seconds=1)
-        new_slice = SeasonSlice(seasons[season_index], start_date, 
-                next_season)
-        all_slices.append(new_slice)
+        log.debug("Building new slice:")
+        #log.debug("   all_slices = %s" % all_slices)
         season_index = (season_index + 1) % len(seasons)
+        next_season = seasons[season_index]
+        log.debug("   next_season = %s" % next_season)
+        start_date = all_slices[-1].end_date + timedelta(seconds=1)
+        log.debug("   start_date = %s" % start_date)
+        new_slice = SeasonSlice(next_season, start_date, 
+                seasons[(season_index + 1) % len(seasons)])
+        log.debug("   new_slice = %s" % new_slice)
+        all_slices.append(new_slice)
 
     log.debug("Seasons:")
     for s in all_slices:

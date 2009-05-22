@@ -366,6 +366,11 @@ class GranolaMainWindow(object):
         elif timeslice == "yearly":
             seasons = YEARLY_SEASONS
 
+        first_slice = find_season(first_activity.start_time, seasons)
+
+        slices = build_all_slices(seasons, first_slice, 
+                last_activity.start_time)
+
         #q = self.session.query(Activity).order_by(Activity.start_time.desc())
         #if self.filter_sport is not None:
         #    q = q.filter(Activity.sport == self.filter_sport)
