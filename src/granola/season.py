@@ -44,7 +44,7 @@ def find_season(activity_date, seasons):
 
     # If we couldn't find a season that starts before our activity date,
     # we want the last one. (which must wrap around over the year)
-    if the_season == None:
+    if the_season is None:
         the_season = seasons[-1]
 
     # Should have found the season with the start date closest to our 
@@ -66,38 +66,41 @@ def find_season(activity_date, seasons):
     next_season = seasons[(i + 1) % len(seasons)]
     log.debug("next season %s: %s - %s" % (next_season.name, 
         next_season.month, next_season.day))
-    next_season_year = start_year # probably the same but could wrap
-    if next_season.month < the_season.month or (next_season.month ==
-            the_season.month and next_season.day < the_season.day):
-        next_season_year = start_year + 1
+    return SeasonSlice(the_season, start_date, next_season)
 
-    end_date = datetime(year=next_season_year, month=next_season.month,
-            day=next_season.day) - timedelta(seconds=1)
-    log.debug("end_date = %s" % end_date)
+def build_all_slices(seasons, starting_slice, end_date):
+    """
+    Return a list of all season slices using the defined seasons,
+    the first concrete slice to begin with, and an end date.
 
-    return SeasonSlice(the_season, start_date, end_date)
+    NOTE: the starting slice *is* returned at the start of the list.
+    """
 
-#def build_all_slices(seasons, starting_slice, end_date):
-#    """
-#    Return a list of all season slices using the defined seasons,
-#    the first concrete slice to begin with, and an end date.
+    # What season does the starting slice point to?
+    season_index = 0
+    for s in seasons:
+        if s.month == starting_slice.start_date.month and \
+                s.day == starting_slice.start_date.day:
+                    break
+        else:
+            season_index += 1
 
-#    NOTE: the starting slice *is* returned at the start of the list.
-#    """
+    # Keep building season slices until one ends beyond the date of
+    # our last activity:
+    all_slices = [starting_slice]
+    while all_slices[-1].end_date <= end_date:
+        next_season = seasons[(season_index + 1) % len(seasons)]
+        start_date = all_slices[-1].end_date + timedelta(seconds=1)
+        new_slice = SeasonSlice(seasons[season_index], start_date, 
+                next_season)
+        all_slices.append(new_slice)
+        season_index = (season_index + 1) % len(seasons)
 
-#    # What season does the starting slice point to?
-#    season_index = 0
-#    for s in seasons:
-#        if s.month == starting_slice.start_date.month and \
-#                s.day == starting_slice.start_date.day:
-#                    break
-#        else:
-#            season_index += 1
+    log.debug("Seasons:")
+    for s in all_slices:
+        log.debug(s)
 
-#    all_slices = [starting_slice]
-#    while all_slices[-1].end_date <= end_date:
-#        next_season = seasons[
-#        new_slice = 
+    return all_slices
 
 
 class Season(object):
@@ -115,16 +118,33 @@ class Season(object):
         self.day = day
         self.name = name
 
+    def __repr__(self):
+        return "<Season: %s - %s-%s>" % (self.name, self.month, self.day)
 
 class SeasonSlice(object):
     """ 
     A concrete season with a defined start and end datetime in a specific
     year.
+
+    End date is calculated based on the start time of the next season.
+    (1 second before)
     """
-    def __init__(self, season, start_date, end_date):
+    def __init__(self, season, start_date, next_season):
         self.season = season
         self.start_date = start_date
-        self.end_date = end_date
+
+        next_season_year = start_date.year # probably the same but could wrap
+        if next_season.month < season.month or (next_season.month ==
+                season.month and next_season.day < season.day):
+            next_season_year += 1
+
+        self.end_date = datetime(year=next_season_year, 
+                month=next_season.month,
+                day=next_season.day) - timedelta(seconds=1)
+
+    def __repr__(self):
+        return "<SeasonSlice %s: %s - %s" % (self.season.name,
+                self.start_date, self.end_date)
 
 
 class LeapDaySeasonBoundaryException(Exception):
