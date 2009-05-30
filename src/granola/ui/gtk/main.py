@@ -120,6 +120,7 @@ class GranolaMainWindow(object):
 
     def main(self):
         """ Launch the GTK main loop. """
+        gtk.gdk.threads_init()
         gtk.main()
 
     def shutdown(self, widget):
@@ -369,6 +370,9 @@ class GranolaMainWindow(object):
         slices = build_season_slices(seasons, first_activity.start_time, 
                 last_activity.start_time)
 
+        for s in slices:
+            self.calculate_slice_totals(s, list_store)
+
         #q = self.session.query(Activity).order_by(Activity.start_time.desc())
         #if self.filter_sport is not None:
         #    q = q.filter(Activity.sport == self.filter_sport)
@@ -398,6 +402,14 @@ class GranolaMainWindow(object):
         ])
 
         return list_store
+
+    def calculate_slice_totals(self, sl, list_store):
+        """
+        Calculate the totals for activities taking place during the given
+        timeslice, and add the appropriate column values to the provided list 
+        store.
+        """
+        q = self.session.query(Activity)
 
     def populate_metrics_timeslice_combo(self):
         """ Populate the metrics timeslice dropdown. """
