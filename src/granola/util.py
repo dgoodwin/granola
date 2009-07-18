@@ -37,4 +37,30 @@ def calculate_speed(session, meters, seconds):
         speed = (meters / 1000) / (seconds / 3600)
     return speed
 
+def calculate_pace(session, meters, seconds):
+    """
+    Calculate pace in seconds per km or mile, depending on user preference.
+    Returns a Decimal, and expects meters and seconds to be Decimal 
+    as well.
+
+    Session passed in here, currently unused as we don't yet have 
+    configurable units, but when we do they'll be in the db.
+    """
+    pace = Decimal('0.0')
+    # Watch for division by 0: 
+    if seconds > 0: 
+        pace = (seconds * 1000) / meters
+    return pace
+
+def format_time_str(seconds):
+    """
+    Return a HH:MM:SS string for the given duration in seconds.
+    """
+    hours = seconds / 3600
+    minutes = (seconds / 60) % 60
+    seconds = seconds % 60
+
+    return "%02i:%02i:%02i" % (hours, minutes, seconds)
+        
+
 

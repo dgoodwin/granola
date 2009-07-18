@@ -195,7 +195,7 @@ class Activity(Base):
             if lap.heart_rate_avg is None:
                 return None
             beats = beats + (lap.heart_rate_avg * (lap.duration / 60))
-        return beats / (self.duration / 60)
+        return int(beats / (self.duration / 60))
     heart_rate_avg = property(_get_heart_rate_avg, None)
 
 

@@ -146,12 +146,16 @@ class GranolaMainWindow(object):
         distance_column = gtk.TreeViewColumn("Distance (km)")
         time_column = gtk.TreeViewColumn("Time")
         avg_speed_column = gtk.TreeViewColumn("Speed (km/hr)")
+        pace_column = gtk.TreeViewColumn("Pace (min/km)")
+        heart_rate_column = gtk.TreeViewColumn("Heart Rate")
 
         self.activity_tv.append_column(sport_column)
         self.activity_tv.append_column(date_column)
         self.activity_tv.append_column(distance_column)
         self.activity_tv.append_column(time_column)
         self.activity_tv.append_column(avg_speed_column)
+        self.activity_tv.append_column(pace_column)
+        self.activity_tv.append_column(heart_rate_column)
 
         cell = gtk.CellRendererText()
 
@@ -160,12 +164,16 @@ class GranolaMainWindow(object):
         distance_column.pack_start(cell, expand=False)
         time_column.pack_start(cell, expand=False)
         avg_speed_column.pack_start(cell, expand=False)
+        pace_column.pack_start(cell, expand=False)
+        heart_rate_column.pack_start(cell, expand=False)
 
         sport_column.set_attributes(cell, text=5)
         date_column.set_attributes(cell, text=1)
         distance_column.set_attributes(cell, text=2)
         time_column.set_attributes(cell, text=3)
         avg_speed_column.set_attributes(cell, text=4)
+        pace_column.set_attributes(cell, text=6)
+        heart_rate_column.set_attributes(cell, text=7)
 
         self.lap_tv = self.glade_xml.get_object('lap_treeview')
 
@@ -286,7 +294,8 @@ class GranolaMainWindow(object):
                 str, #time
                 str, # avg speed
                 str, # sport
-                #float, # avg heart rate
+                str, # pace
+                str, # avg heart rate
         )
         q = self.session.query(Activity).order_by(Activity.start_time.desc())
         if self.filter_sport is not None:
@@ -295,17 +304,16 @@ class GranolaMainWindow(object):
         #        sport).order_by(Activity.start_time.desc())
         for run in q.all():
             duration_seconds = run.duration
-            hours = duration_seconds / 3600
-            minutes = (duration_seconds / 60) % 60
-            seconds = duration_seconds % 60
 
             list_store.append([
                 run.id,
                 run.start_time.strftime("%Y-%m-%d"),
                 "%.2f" % (run.distance / 1000),
-                "%02i:%02i:%02i" % (hours, minutes, seconds),
+                format_time_str(duration_seconds),
                 "%.2f" % (calculate_speed(self.session, run.distance, duration_seconds)),
                 run.sport.name,
+                "%.2f" % (calculate_pace(self.session, run.distance, duration_seconds) / 60),
+                run.heart_rate_avg,
             ])
 
         return list_store
@@ -399,18 +407,15 @@ class GranolaMainWindow(object):
             total_distance += acti.distance
             total_duration += acti.duration
 
-        hours = total_duration / 3600
-        minutes = (total_duration / 60) % 60
-        seconds = total_duration % 60
-
         speed = calculate_speed(self.session, total_distance, total_duration)
+        pace = calculate_pace(self.session, total_distance, total_duration)
 
         list_store.append([
             "%s %s" % (sl.season.name, sl.start_date.year),
             "%.2f" % (total_distance / 1000),
-            "%02i:%02i:%02i" % (hours, minutes, seconds),
+            format_time_str(total_duration),
             "%.2f" % (speed),
-            "pace",
+            "%.2f" % (pace / 60),
             "hr",
         ])
         
@@ -490,13 +495,10 @@ class GranolaMainWindow(object):
         avg_hr_widget = self.glade_xml.get_object('activity_hr_display')
 
         duration_seconds = activity.duration
-        hours = duration_seconds / 3600
-        minutes = (duration_seconds / 60) % 60
-        seconds = duration_seconds % 60
 
         start_time_widget.set_text(activity.start_time.strftime(
             "%Y-%m-%d %H:%M"))
-        time_widget.set_text("%02i:%02i:%02i" % (hours, minutes, seconds))
+        time_widget.set_text(format_time_str(duration_seconds))
         distance_widget.set_text("%.2f km" % (activity.distance / 1000))
         speed_widget.set_text("%.2f km/hr" % ((activity.distance / 1000) /
             (duration_seconds / 3600)))
@@ -521,14 +523,11 @@ class GranolaMainWindow(object):
         i = 1
         for lap in q.all():
             duration_seconds = lap.duration
-            hours = duration_seconds / 3600
-            minutes = (duration_seconds / 60) % 60
-            seconds = duration_seconds % 60
 
             lap_liststore.append([
                 i,
                 "%.2f" % (lap.distance / 1000),
-                "%02i:%02i:%02i" % (hours, minutes, seconds),
+                format_time_str(duration_seconds),
                 "%.2f" % ((lap.distance / 1000) / (duration_seconds / 3600)),
                 lap.heart_rate_avg,
                 lap.heart_rate_max,

@@ -33,4 +33,14 @@ class UtilTests(unittest.TestCase):
         self.assertEquals(Decimal('8.4'), calculate_speed(None, Decimal(2540), 
             Decimal(1086)).quantize(Decimal('.1')))
 
+    def test_calculate_pace(self):
+        self.assertEquals(Decimal('428'), calculate_pace(None, Decimal(2540), 
+            Decimal(1086)).quantize(Decimal('1')))
+
+    def test_format_time_str(self):
+        self.assertEquals("01:00:00", format_time_str(3600))
+        self.assertEquals("00:50:00", format_time_str(3000))
+        self.assertEquals("00:00:00", format_time_str(0))
+        self.assertEquals("100:00:00", format_time_str(360000))
+
 
