@@ -307,7 +307,7 @@ class GranolaMainWindow(object):
 
             list_store.append([
                 run.id,
-                run.start_time.strftime("%Y-%m-%d"),
+                run.start_time.strftime("%Y-%m-%d %H:%M"),
                 "%.2f" % (run.distance / 1000),
                 format_time_str(duration_seconds),
                 "%.2f" % (calculate_speed(self.session, run.distance, duration_seconds)),
