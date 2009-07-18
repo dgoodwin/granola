@@ -27,6 +27,8 @@ import gobject
 import os
 import sys
 
+from decimal import Decimal
+
 from granola.log import log
 from granola.model import *
 from granola.ui.gtk.browser import *
@@ -373,34 +375,6 @@ class GranolaMainWindow(object):
         for s in slices:
             self.calculate_slice_totals(s, list_store)
 
-        #q = self.session.query(Activity).order_by(Activity.start_time.desc())
-        #if self.filter_sport is not None:
-        #    q = q.filter(Activity.sport == self.filter_sport)
-        ##q = self.session.query(Activity).filter(Activity.sport ==
-        ##        sport).order_by(Activity.start_time.desc())
-        #for run in q.all():
-        #    duration_seconds = run.duration
-        #    hours = duration_seconds / 3600
-        #    minutes = (duration_seconds / 60) % 60
-        #    seconds = duration_seconds % 60
-
-        #    list_store.append([
-        #        run.id,
-        #        run.start_time.strftime("%Y-%m-%d"),
-        #        "%.2f" % (run.distance / 1000),
-        #        "%02i:%02i:%02i" % (hours, minutes, seconds),
-        #        "%.2f" % ((run.distance / 1000) / (duration_seconds / 3600)),
-        #        run.sport.name,
-        #    ])
-        list_store.append([
-            "Jan 2008",
-            "30",
-            "12:00",
-            "15.00",
-            "25",
-            "150"
-        ])
-
         return list_store
 
     def calculate_slice_totals(self, sl, list_store):
@@ -410,7 +384,37 @@ class GranolaMainWindow(object):
         store.
         """
         q = self.session.query(Activity)
+        q = q.filter(Activity.start_time >= sl.start_date)
+        q = q.filter(Activity.start_time <= sl.end_date)
+        q = q.filter(Activity.sport == self.metrics_sport)
+        activities = q.all()
+        log.debug("Found %s activities for slice: %s" % (len(activities), sl.season.name))
 
+        total_distance = Decimal("0")
+        total_duration = Decimal("0")
+
+        for acti in activities:
+            log.debug("   %s - %s" % (acti.start_time, acti.sport.name))
+            total_distance += acti.distance
+            total_duration += acti.duration
+
+        hours = total_duration / 3600
+        minutes = (total_duration / 60) % 60
+        seconds = total_duration % 60
+
+        speed = 0.0
+        if total_duration > 0:
+            speed = (total_distance / 1000) / (total_duration / 3600)
+
+        list_store.append([
+            "%s %s" % (sl.season.name, sl.start_date.year),
+            "%.2f" % (total_distance / 1000),
+            "%02i:%02i:%02i" % (hours, minutes, seconds),
+            "%.2f" % (speed),
+            "pace",
+            "hr",
+        ])
+        
     def populate_metrics_timeslice_combo(self):
         """ Populate the metrics timeslice dropdown. """
         log.debug("Populating metrics timeslice dropdown.")
