@@ -34,6 +34,7 @@ from granola.model import *
 from granola.ui.gtk.browser import *
 from granola import write_config
 from granola.season import *
+from granola.util import *
 
 RUNNING = "running"
 BIKING = "biking"
@@ -303,7 +304,7 @@ class GranolaMainWindow(object):
                 run.start_time.strftime("%Y-%m-%d"),
                 "%.2f" % (run.distance / 1000),
                 "%02i:%02i:%02i" % (hours, minutes, seconds),
-                "%.2f" % ((run.distance / 1000) / (duration_seconds / 3600)),
+                "%.2f" % (calculate_speed(self.session, run.distance, duration_seconds)),
                 run.sport.name,
             ])
 
@@ -402,9 +403,7 @@ class GranolaMainWindow(object):
         minutes = (total_duration / 60) % 60
         seconds = total_duration % 60
 
-        speed = 0.0
-        if total_duration > 0:
-            speed = (total_distance / 1000) / (total_duration / 3600)
+        speed = calculate_speed(self.session, total_distance, total_duration)
 
         list_store.append([
             "%s %s" % (sl.season.name, sl.start_date.year),
@@ -567,6 +566,7 @@ class GranolaMainWindow(object):
         # TODO: More expensive than it needs to be, could just delete row from
         # model?
         self.populate_activities()
+        self.populate_metrics()
 
     def activities_sport_combo_cb(self, widget):
         """
