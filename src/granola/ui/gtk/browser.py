@@ -62,6 +62,7 @@ class WebStatusBar(gtk.Statusbar):
 class WebBrowser(gtk.VBox):
     def __init__(self):
         gtk.VBox.__init__(self, spacing=4)
+        self.temp_file = None
 
         self._loading = False
         self._browser= BrowserPage()
@@ -92,6 +93,10 @@ class WebBrowser(gtk.VBox):
 
     def show_activity(self, activity):
         """ Display the given activity on the map. """
+        if self.temp_file:
+            log.info("Removing: %s" % self.temp_file)
+            commands.getstatusoutput("rm %s" % self.temp_file)
+
         generator = HtmlGenerator(activity)
         self.temp_file = generator.generate_html()
         log.debug("Wrote activity HTML to: %s" % self.temp_file)

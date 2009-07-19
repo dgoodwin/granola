@@ -3,10 +3,10 @@
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="main_window">
-    <property name="width_request">1200</property>
-    <property name="height_request">800</property>
-    <property name="default_width">1200</property>
-    <property name="default_height">800</property>
+    <property name="width_request">900</property>
+    <property name="height_request">900</property>
+    <property name="default_width">900</property>
+    <property name="default_height">900</property>
     <accel-groups>
       <group name="accelgroup1"/>
     </accel-groups>
@@ -187,7 +187,7 @@
                       <object class="GtkLabel" id="label5">
                         <property name="width_request">300</property>
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">&lt;span size="large"&gt;Details&lt;/span&gt;</property>
+                        <property name="label" translatable="yes">&lt;span size="large"&gt;Laps&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
@@ -198,7 +198,7 @@
                       <object class="GtkLabel" id="label6">
                         <property name="width_request">500</property>
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">&lt;span size="large"&gt;Laps&lt;/span&gt;</property>
+                        <property name="label" translatable="yes">&lt;span size="large"&gt;Map&lt;/span&gt;</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
