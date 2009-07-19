@@ -57,7 +57,7 @@ HTML_FOOTER = """
   </head>
 
   <body onload="initialize()">
-      <div id="map_canvas" style="width: 425px; height: 360px; float:center; border: 1px solid black;"></div>
+      <div id="map_canvas" style="width: %spx; height: %spx; float:center; border: 1px solid black;"></div>
   </body>
 </html>
 """
@@ -119,8 +119,15 @@ def get_zoom_level(distance):
 
 class HtmlGenerator(object):
 
-    def __init__(self, activity):
+    def __init__(self, activity, width, height):
+        """
+        Constructor
+
+        Width and height are specified in pixels.
+        """
         self.activity = activity
+        self.map_width = width
+        self.map_height = height
 
     def generate_html(self):
         """ 
@@ -174,7 +181,7 @@ class HtmlGenerator(object):
         #f.write("""map.addOverlay(new GMarker(new GLatLng(%s, %s)));""" %
         #        (minLat, minLon))
 
-        f.write(HTML_FOOTER)
+        f.write(HTML_FOOTER % (self.map_width, self.map_height))
         f.close()
         return filepath
 

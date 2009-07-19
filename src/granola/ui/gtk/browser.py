@@ -59,18 +59,15 @@ class WebStatusBar(gtk.Statusbar):
         self.iconbox.hide()
 
 
-class WebBrowser(gtk.VBox):
+class BaseBrowser:
+    """ Parent class for BrowserWindow and BrowserWidget. """
     def __init__(self):
-        gtk.VBox.__init__(self, spacing=4)
         self.temp_file = None
 
         self._loading = False
         self._browser= BrowserPage()
-        self._browser.connect('load-started', self._loading_start_cb)
         self._browser.connect('load-progress-changed', 
                 self._loading_progress_cb)
-#        self._browser.connect("title-changed", 
-#                self._title_changed_cb)
         self._browser.connect("hovering-over-link", 
                 self._hover_link_cb)
         self._browser.connect("status-bar-text-changed", 
@@ -86,12 +83,8 @@ class WebBrowser(gtk.VBox):
 
         self._statusbar = WebStatusBar()
 
-        self.pack_start(self._scrolled_window)
-        self.pack_end(self._statusbar, expand=False, fill=False)
-
         self.current_activity = None
 
-        self.show_all()
 
     def show_activity(self, activity):
         """ Display the given activity on the map. """
@@ -106,33 +99,16 @@ class WebBrowser(gtk.VBox):
             commands.getstatusoutput("rm %s" % self.temp_file)
 
         self.current_activity = activity
-        generator = HtmlGenerator(activity)
+        generator = HtmlGenerator(activity, self.map_width, self.map_height)
         self.temp_file = generator.generate_html()
         log.debug("Wrote activity HTML to: %s" % self.temp_file)
         self._browser.open("file://%s" % self.temp_file)
-
-    def close_window(self, widget):
-        log.info("Removing: %s" % self.temp_file)
-        commands.getstatusoutput("rm %s" % self.temp_file)
-        self.destroy()
-
-    #def _set_title(self, title):
-    #    self.props.title = title
-
-    def _loading_start_cb(self, view, frame):
-        main_frame = self._browser.get_main_frame()
-        #if frame is main_frame:
-        #    self._set_title(_("Loading %s - %s") % 
-        #            (frame.get_title(),frame.get_uri()))
 
     def _loading_progress_cb(self, view, progress):
         self._set_progress(_("%s%s loaded") % (progress, '%'))
 
     def _set_progress(self, progress):
         self._statusbar.display(progress)
-
-    #def _title_changed_cb(self, widget, frame, title):
-    #    self._set_title(_("%s") % title)
 
     def _hover_link_cb(self, view, title, url):
         if view and url:
@@ -150,3 +126,59 @@ class WebBrowser(gtk.VBox):
     def _javascript_console_message_cb(self, view, message, line, sourceid):
         self._statusbar.show_javascript_info()
 
+
+class BrowserWidget(BaseBrowser, gtk.VBox):
+    map_width = 425
+    map_height = 360
+
+    def __init__(self):
+        gtk.VBox.__init__(self, spacing=4)
+        BaseBrowser.__init__(self)
+
+        self.pack_start(self._scrolled_window)
+        self.pack_end(self._statusbar, expand=False, fill=False)
+
+        self.show_all()
+
+
+class BrowserWindow(BaseBrowser, gtk.Window):
+    map_width = 750
+    map_height = 550
+
+    def __init__(self, activity):
+        gtk.Window.__init__(self)
+        BaseBrowser.__init__(self)
+
+        self._browser.connect("title-changed", 
+                self._title_changed_cb)
+        self._browser.connect('load-started', self._loading_start_cb)
+
+        vbox = gtk.VBox(spacing=4)
+        vbox.pack_start(self._scrolled_window)
+        vbox.pack_end(self._statusbar, expand=False, fill=False)
+
+        self.add(vbox)
+        self.set_default_size(800, 600)
+
+        self.connect('destroy', self.close_window)
+        self.show_activity(activity)
+
+        self.show_all()
+
+    def close_window(self, widget):
+        log.info("Removing: %s" % self.temp_file)
+        commands.getstatusoutput("rm %s" % self.temp_file)
+        self.destroy()
+
+    def _set_title(self, title):
+        self.props.title = title
+
+    def _title_changed_cb(self, widget, frame, title):
+        self._set_title(_("%s") % title)
+
+    def _loading_start_cb(self, view, frame):
+        main_frame = self._browser.get_main_frame()
+
+        if frame is main_frame:
+            self._set_title(_("Loading %s - %s") % 
+                    (frame.get_title(),frame.get_uri()))

@@ -121,7 +121,7 @@ class GranolaMainWindow(object):
         self.biking = self.session.query(Sport).filter(
                 Sport.name == BIKING).one()
 
-        self.browser_widget = WebBrowser()
+        self.browser_widget = BrowserWidget()
         self.activity_hbox.pack_start(self.browser_widget)
 
         self.populate_activities()
@@ -585,7 +585,7 @@ class GranolaMainWindow(object):
         activity = self.session.query(Activity).filter(Activity.id ==
                 model.get_value(iter, 0)).one()
 
-        activity_details_window = WebBrowser(activity)
+        activity_details_window = BrowserWindow(activity)
         activity_details_window.show_all()
 
     def activity_delete_cb(self, widget):
