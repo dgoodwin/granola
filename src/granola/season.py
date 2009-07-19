@@ -146,12 +146,14 @@ class SeasonSlice(object):
 
         next_season_year = start_date.year # probably the same but could wrap
         if next_season.month < season.month or (next_season.month ==
-                season.month and next_season.day < season.day):
+                season.month and next_season.day <= season.day):
             next_season_year += 1
 
         self.end_date = datetime(year=next_season_year, 
                 month=next_season.month,
                 day=next_season.day) - timedelta(seconds=1)
+        if self.end_date < self.start_date:
+            raise Exception("Calculated end_date less than start_date")
 
     def __repr__(self):
         return "<SeasonSlice %s: %s - %s" % (self.season.name,
@@ -183,4 +185,6 @@ MONTHLY_SEASONS = [
         Season(11, 1, "November"),
         Season(12, 1, "December")
 ]
-YEARLY_SEASONS = [Season(1, 1, "Some Year")] # TODO: not the best name eh?
+
+# TODO: not the best name eh? Support a callback function.
+YEARLY_SEASONS = [Season(1, 1, "Some Year")] 

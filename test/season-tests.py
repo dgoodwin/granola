@@ -75,6 +75,33 @@ class SeasonTests(unittest.TestCase):
         self.assertEquals(2009, all_slices[1].start_date.year)
         self.assertEquals(2009, all_slices[2].start_date.year)
 
+    def test_yearly_seasons(self):
+        first_activity_date = datetime(2008, 12, 26, 15, 30)
+        last_activity_date = datetime(2009, 02, 22, 17, 0)
+        all_slices = build_season_slices(YEARLY_SEASONS, 
+                first_activity_date, last_activity_date)
+        self.assertEquals(2, len(all_slices))
+
+        # TODO: Check names
+
+        # Check the 2008 slice:
+        self.assertEquals(2008, all_slices[0].start_date.year)
+        self.assertEquals(1, all_slices[0].start_date.month)
+        self.assertEquals(1, all_slices[0].start_date.day)
+
+        self.assertEquals(2008, all_slices[0].end_date.year)
+        self.assertEquals(12, all_slices[0].end_date.month)
+        self.assertEquals(31, all_slices[0].end_date.day)
+
+        # Check the 2009 slice:
+        self.assertEquals(2009, all_slices[1].start_date.year)
+        self.assertEquals(1, all_slices[1].start_date.month)
+        self.assertEquals(1, all_slices[1].start_date.day)
+
+        self.assertEquals(2009, all_slices[1].end_date.year)
+        self.assertEquals(12, all_slices[1].end_date.month)
+        self.assertEquals(31, all_slices[1].end_date.day)
+
 
         
 
