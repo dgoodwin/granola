@@ -102,8 +102,6 @@ class GranolaMainWindow(object):
             'on_prefs_menu_item_activate': self.open_prefs_dialog_cb,
             'on_activity_treeview_button_press_event':
                 self.activity_tv_click_cb,
-            'on_activity_popup_delete_activate':
-                self.activity_delete_cb,
             'on_activity_treeview_row_activated':
                 self.activity_tv_doubleclick_cb,
             'on_sport_filter_combobox_changed':
@@ -112,6 +110,11 @@ class GranolaMainWindow(object):
                 self.metrics_sport_combo_cb,
             'on_metrics_timeslice_combo_changed':
                 self.metrics_timeslice_combo_cb,
+
+            'on_activity_popup_delete_activate':
+                self.activity_delete_cb,
+            'on_activity_popup_showmap_activate':
+                self.activity_showmap_cb,
         }
         self.glade_xml.connect_signals(signals)
 
@@ -592,19 +595,24 @@ class GranolaMainWindow(object):
         """
         Callback for when user selected delete from the activity popup menu.
         """
-        treeselection = self.activity_tv.get_selection()
-        (model, iter) = treeselection.get_selected()
-        query = self.session.query(Activity).filter(Activity.id ==
-                model.get_value(iter, 0))
-        delete_me = query.one() # will error if not exactly one row returned
-        log.debug("Deleting! %s" % delete_me)
-        self.session.delete(delete_me)
+        activity = self.get_selected_activity()
+        log.debug("Deleting! %s" % activity)
+        self.session.delete(activity)
         self.session.commit()
 
         # TODO: More expensive than it needs to be, could just delete row from
         # model?
         self.populate_activities()
         self.populate_metrics()
+
+    def activity_showmap_cb(self, widget):
+        """
+        Callback for when user selected Show Map from the activity popup menu.
+        """
+        activity = self.get_selected_activity()
+        log.debug("Opening map window for: %s" % activity)
+        activity_details_window = BrowserWindow(activity)
+        activity_details_window.show_all()
 
     def activities_sport_combo_cb(self, widget):
         """
