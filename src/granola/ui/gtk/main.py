@@ -66,6 +66,7 @@ class GranolaMainWindow(object):
 
     def __init__(self, config):
         log.debug("Starting GTK UI.")
+        gtk.gdk.threads_init()
         self.config = config
         self.session = Session()
 
@@ -73,6 +74,8 @@ class GranolaMainWindow(object):
         self.glade_xml = gtk.Builder()
         self.glade_xml.add_from_file(find_file_on_path(glade_file))
         main_window = self.glade_xml.get_object('main_window')
+        self.activity_hbox = self.glade_xml.get_object(
+                'activity_hbox')
 
         # Filter main list of activities based on this, None = show all.
         # Storing just the string name here.
@@ -119,11 +122,13 @@ class GranolaMainWindow(object):
         self.populate_activities()
         self.populate_metrics()
 
+        self.browser_widget = WebBrowser()
+        self.activity_hbox.pack_start(self.browser_widget)
+
         main_window.show_all()
 
     def main(self):
         """ Launch the GTK main loop. """
-        gtk.gdk.threads_init()
         gtk.main()
 
     def shutdown(self, widget):
@@ -486,28 +491,8 @@ class GranolaMainWindow(object):
         """
         Display an activities details. (below the activities list)
         """
-        start_time_widget = self.glade_xml.get_object('activity_date_display')
-        time_widget = self.glade_xml.get_object('activity_time_display')
-        distance_widget = self.glade_xml.get_object(
-            'activity_distance_display')
-        speed_widget = self.glade_xml.get_object('activity_speed_display')
-        pace_widget = self.glade_xml.get_object('activity_pace_display')
-        avg_hr_widget = self.glade_xml.get_object('activity_hr_display')
-
         duration_seconds = activity.duration
-
-        start_time_widget.set_text(activity.start_time.strftime(
-            "%Y-%m-%d %H:%M"))
-        time_widget.set_text(format_time_str(duration_seconds))
-        distance_widget.set_text("%.2f km" % (activity.distance / 1000))
-        speed_widget.set_text("%.2f km/hr" % ((activity.distance / 1000) /
-            (duration_seconds / 3600)))
-        pace_widget.set_text("-")
-
-        avg_hr = "-" # activity may not have heart rate data
-        if activity.heart_rate_avg is not None:
-            avg_hr = "%.0f" % activity.heart_rate_avg
-        avg_hr_widget.set_text(avg_hr)
+        self.browser_widget.show_activity(activity)
 
         lap_liststore = gtk.ListStore(
                 int, # lap number

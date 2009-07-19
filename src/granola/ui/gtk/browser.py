@@ -59,20 +59,17 @@ class WebStatusBar(gtk.Statusbar):
         self.iconbox.hide()
 
 
-class WebBrowser(gtk.Window):
-    def __init__(self, activity):
-        gtk.Window.__init__(self)
-        self.activity = activity
-
-        log.debug("Opening browser window.")
+class WebBrowser(gtk.VBox):
+    def __init__(self):
+        gtk.VBox.__init__(self, spacing=4)
 
         self._loading = False
         self._browser= BrowserPage()
         self._browser.connect('load-started', self._loading_start_cb)
         self._browser.connect('load-progress-changed', 
                 self._loading_progress_cb)
-        self._browser.connect("title-changed", 
-                self._title_changed_cb)
+#        self._browser.connect("title-changed", 
+#                self._title_changed_cb)
         self._browser.connect("hovering-over-link", 
                 self._hover_link_cb)
         self._browser.connect("status-bar-text-changed", 
@@ -88,35 +85,31 @@ class WebBrowser(gtk.Window):
 
         self._statusbar = WebStatusBar()
 
-        vbox = gtk.VBox(spacing=4)
-        vbox.pack_start(self._scrolled_window)
-        vbox.pack_end(self._statusbar, expand=False, fill=False)
-
-        self.add(vbox)
-        self.set_default_size(800, 600)
-
-        self.connect('destroy', self.close_window)
-        generator = HtmlGenerator(self.activity)
-        self.temp_file = generator.generate_html()
-        log.debug("Wrote activity HTML to: %s" % self.temp_file)
-        #self._browser.load_string(html, "text/html", "iso-8859-15", "about:")
-        self._browser.open("file://%s" % self.temp_file)
+        self.pack_start(self._scrolled_window)
+        self.pack_end(self._statusbar, expand=False, fill=False)
 
         self.show_all()
+
+    def show_activity(self, activity):
+        """ Display the given activity on the map. """
+        generator = HtmlGenerator(activity)
+        self.temp_file = generator.generate_html()
+        log.debug("Wrote activity HTML to: %s" % self.temp_file)
+        self._browser.open("file://%s" % self.temp_file)
 
     def close_window(self, widget):
         log.info("Removing: %s" % self.temp_file)
         commands.getstatusoutput("rm %s" % self.temp_file)
         self.destroy()
 
-    def _set_title(self, title):
-        self.props.title = title
+    #def _set_title(self, title):
+    #    self.props.title = title
 
     def _loading_start_cb(self, view, frame):
         main_frame = self._browser.get_main_frame()
-        if frame is main_frame:
-            self._set_title(_("Loading %s - %s") % 
-                    (frame.get_title(),frame.get_uri()))
+        #if frame is main_frame:
+        #    self._set_title(_("Loading %s - %s") % 
+        #            (frame.get_title(),frame.get_uri()))
 
     def _loading_progress_cb(self, view, progress):
         self._set_progress(_("%s%s loaded") % (progress, '%'))
@@ -124,8 +117,8 @@ class WebBrowser(gtk.Window):
     def _set_progress(self, progress):
         self._statusbar.display(progress)
 
-    def _title_changed_cb(self, widget, frame, title):
-        self._set_title(_("%s") % title)
+    #def _title_changed_cb(self, widget, frame, title):
+    #    self._set_title(_("%s") % title)
 
     def _hover_link_cb(self, view, title, url):
         if view and url:
