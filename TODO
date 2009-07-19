@@ -1,9 +1,12 @@
 === High Priority ===
 
-- Display stats tab.
-- Display in Google Maps.
-- Generate KML files from what's in our db or from orig files?
-  - http://code.google.com/apis/kml/documentation/kmlreference.html
+- Infinite loop on yearly metrics.
+- autoload the map for first activity.
+- store dropdown picks in the db to remember them.
+- add an activity name column.
+- add an activity soruce column. (tcx files for now)
+- safe delete
+- display big map
 
 === Medium Priority === 
 

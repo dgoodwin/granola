@@ -42,14 +42,14 @@ HTML_HEADER = """
                 var map = new GMap2(document.getElementById("map_canvas"));
                 // Initialize map, should be done before everything else.
                 map.setCenter(new GLatLng(%s, %s), %s);
-                map.setMapType(G_HYBRID_MAP);
+                //map.setMapType(G_HYBRID_MAP);
                 map.setUIToDefault();
                 var polyline = new GPolyline([
 """
 
 HTML_FOOTER = """
-                map.addControl(new GSmallMapControl());
-                map.addControl(new GSmallMapControl());
+                //map.addControl(new GSmallMapControl());
+                //map.addControl(new GSmallMapControl());
                 map.addOverlay(polyline);
             }
         } 
@@ -57,7 +57,7 @@ HTML_FOOTER = """
   </head>
 
   <body onload="initialize()">
-      <div id="map_canvas" style="width: 425px; height: 270px; float:center; border: 1px solid black;"></div>
+      <div id="map_canvas" style="width: 425px; height: 360px; float:center; border: 1px solid black;"></div>
   </body>
 </html>
 """

@@ -4,9 +4,9 @@
   <!-- interface-naming-policy toplevel-contextual -->
   <object class="GtkWindow" id="main_window">
     <property name="width_request">900</property>
-    <property name="height_request">900</property>
+    <property name="height_request">800</property>
     <property name="default_width">900</property>
-    <property name="default_height">900</property>
+    <property name="default_height">800</property>
     <accel-groups>
       <group name="accelgroup1"/>
     </accel-groups>
@@ -168,9 +168,9 @@
                     <property name="vscrollbar_policy">automatic</property>
                     <child>
                       <object class="GtkTreeView" id="activity_treeview">
-                        <property name="height_request">250</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="search_column">6</property>
                         <signal name="button_press_event" handler="on_activity_treeview_button_press_event"/>
                         <signal name="row_activated" handler="on_activity_treeview_row_activated"/>
                       </object>
@@ -215,6 +215,7 @@
                 </child>
                 <child>
                   <object class="GtkHBox" id="activity_hbox">
+                    <property name="height_request">420</property>
                     <property name="visible">True</property>
                     <property name="homogeneous">True</property>
                     <child>
@@ -240,6 +241,7 @@
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">False</property>
                     <property name="position">3</property>
                   </packing>
                 </child>
