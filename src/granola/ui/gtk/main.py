@@ -121,11 +121,11 @@ class GranolaMainWindow(object):
         self.biking = self.session.query(Sport).filter(
                 Sport.name == BIKING).one()
 
-        self.populate_activities()
-        self.populate_metrics()
-
         self.browser_widget = WebBrowser()
         self.activity_hbox.pack_start(self.browser_widget)
+
+        self.populate_activities()
+        self.populate_metrics()
 
         main_window.show_all()
 
@@ -289,6 +289,29 @@ class GranolaMainWindow(object):
 
         activity_liststore = self.build_activity_liststore()
         self.activity_tv.set_model(activity_liststore)
+        tree_selection = self.activity_tv.get_selection()
+        (model, iter) = tree_selection.get_selected()
+        if (iter == None):
+            log.debug("No activity selected, auto-selecting first row.")
+            iter = model.get_iter_first()
+            tree_selection.select_iter(iter)
+            self.display_activity(self.get_selected_activity())
+
+    def get_selected_activity(self):
+        """
+        Return an activity object for the currently selected row on the 
+        Activities tab.
+
+        We auto-select the first row, so it's reasonable to assume there
+        always will be a value to return here.
+        """
+        tree_selection = self.activity_tv.get_selection()
+        (model, iter) = tree_selection.get_selected()
+
+        activity_id = model.get_value(iter, 0)
+        activity = self.session.query(Activity).filter(Activity.id ==
+                activity_id).one()
+        return activity
 
     def build_activity_liststore(self):
         """
