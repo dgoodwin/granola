@@ -285,17 +285,46 @@ class GranolaMainWindow(object):
         self.metrics_sport = sports[0]
 
     def populate_activities(self):
-        """ Populate activity list. """
+        """ 
+        Populate activity list. 
+        
+        Called not just when we initialize the UI but also when the user 
+        changes the Sport combobox and we need to change the list of 
+        activities displayed.
+        """
+        # TODO: Is it possible to keep the model here, and "filter" it 
+        # with GTK? Would be much more efficient.
 
-        activity_liststore = self.build_activity_liststore()
-        self.activity_tv.set_model(activity_liststore)
+        # Grab current selection if there is one, we'll preserve it if that
+        # activity is present in the new list.
         tree_selection = self.activity_tv.get_selection()
         (model, iter) = tree_selection.get_selected()
-        if (iter == None):
+        preserve_activity_id = None
+        if (iter != None):
+            preserve_activity_id = model.get_value(iter, 0)
+
+
+        model = self.build_activity_liststore()
+        self.activity_tv.set_model(model)
+
+        iter = model.get_iter_first() # Points to the row we'll select
+
+        if (preserve_activity_id is not None):
+            log.debug("Searching for activity to preserve.")
+            search_iter = model.get_iter_first()
+            while search_iter is not None:
+                log.debug("Examining: %s" % model.get_value(search_iter, 0))
+                if model.get_value(search_iter, 0) == preserve_activity_id:
+                    log.debug("Re-selecting activity: %s" % 
+                            preserve_activity_id)
+                    iter = search_iter
+                    break
+                search_iter = model.iter_next(search_iter)
+        else:
             log.debug("No activity selected, auto-selecting first row.")
-            iter = model.get_iter_first()
-            tree_selection.select_iter(iter)
-            self.display_activity(self.get_selected_activity())
+
+        tree_selection.select_iter(iter)
+        self.display_activity(self.get_selected_activity())
 
     def get_selected_activity(self):
         """

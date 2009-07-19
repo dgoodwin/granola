@@ -89,14 +89,23 @@ class WebBrowser(gtk.VBox):
         self.pack_start(self._scrolled_window)
         self.pack_end(self._statusbar, expand=False, fill=False)
 
+        self.current_activity = None
+
         self.show_all()
 
     def show_activity(self, activity):
         """ Display the given activity on the map. """
+        # If we're already displaying this activity, don't do anything.
+        # Useful check for some scenarios where the use changes a combo.
+        if activity == self.current_activity:
+            log.debug("Already displaying activity: %s" % activity)
+            return
+
         if self.temp_file:
             log.info("Removing: %s" % self.temp_file)
             commands.getstatusoutput("rm %s" % self.temp_file)
 
+        self.current_activity = activity
         generator = HtmlGenerator(activity)
         self.temp_file = generator.generate_html()
         log.debug("Wrote activity HTML to: %s" % self.temp_file)
