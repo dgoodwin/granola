@@ -290,6 +290,7 @@
                     <child>
                       <object class="GtkComboBox" id="metrics_timeslice_combo">
                         <property name="visible">True</property>
+                        <signal name="changed" handler="on_metrics_timeslice_combo_changed"/>
                       </object>
                       <packing>
                         <property name="position">0</property>

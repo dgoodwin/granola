@@ -110,6 +110,8 @@ class GranolaMainWindow(object):
                 self.activities_sport_combo_cb,
             'on_metrics_sport_combo_changed':
                 self.metrics_sport_combo_cb,
+            'on_metrics_timeslice_combo_changed':
+                self.metrics_timeslice_combo_cb,
         }
         self.glade_xml.connect_signals(signals)
 
@@ -579,6 +581,14 @@ class GranolaMainWindow(object):
                     Sport.name == filter_name).one()
 
         self.populate_metrics()
+
+    def metrics_timeslice_combo_cb(self, widget):
+        """
+        Callback for when user changes the filter on timeslice. 
+        (yearly/monthly etc.)
+        """
+        self.populate_metrics()
+
 
 
 class PreferencesDialog(object):
