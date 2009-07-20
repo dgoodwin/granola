@@ -33,7 +33,7 @@ def calculate_speed(session, meters, seconds):
     """
     speed = Decimal('0.0')
     # Watch for division by 0: 
-    if seconds > 0: 
+    if seconds > 0 and meters > 0: 
         speed = (meters / 1000) / (seconds / 3600)
     return speed
 
@@ -48,7 +48,7 @@ def calculate_pace(session, meters, seconds):
     """
     pace = Decimal('0.0')
     # Watch for division by 0: 
-    if seconds > 0: 
+    if seconds > 0 and meters > 0: 
         pace = (seconds * 1000) / meters
     return pace
 
