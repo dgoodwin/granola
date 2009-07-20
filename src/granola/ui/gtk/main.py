@@ -593,17 +593,27 @@ class GranolaMainWindow(object):
 
     def activity_delete_cb(self, widget):
         """
-        Callback for when user selected delete from the activity popup menu.
+        Confirm dialog if the user actually wishes to delete an activity.
         """
-        activity = self.get_selected_activity()
-        log.debug("Deleting! %s" % activity)
-        self.session.delete(activity)
-        self.session.commit()
+        dialog = gtk.Dialog(title="Are you sure?",  
+                flags=gtk.DIALOG_MODAL,
+                buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
+                      gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+        result = dialog.run()
+        dialog.destroy()
 
-        # TODO: More expensive than it needs to be, could just delete row from
-        # model?
-        self.populate_activities()
-        self.populate_metrics()
+        if result == gtk.RESPONSE_ACCEPT:
+            activity = self.get_selected_activity()
+            log.debug("Deleting! %s" % activity)
+            self.session.delete(activity)
+            self.session.commit()
+
+            # TODO: More expensive than it needs to be, could just delete row from
+            # model?
+            self.populate_activities()
+            self.populate_metrics()
+        else:
+            log.debug("NOT deleting activity.")
 
     def activity_showmap_cb(self, widget):
         """
