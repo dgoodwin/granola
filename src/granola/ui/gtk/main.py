@@ -326,8 +326,9 @@ class GranolaMainWindow(object):
         else:
             log.debug("No activity selected, auto-selecting first row.")
 
-        tree_selection.select_iter(iter)
-        self.display_activity(self.get_selected_activity())
+        if iter is not None:
+            tree_selection.select_iter(iter)
+            self.display_activity(self.get_selected_activity())
 
     def get_selected_activity(self):
         """
